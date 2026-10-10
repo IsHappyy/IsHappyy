@@ -95,3 +95,33 @@ def test_finish_key():
     assert finish_key("Anodize clear") == "anodize"
     assert finish_key("-") == "none"
     assert finish_key("HRC 58-60") is None
+
+
+def test_reconciler_v3_schema():
+    """Shape copied from prompts/reconciler.md (v3)."""
+    ps = {
+        "template_guess": "Pioneer",
+        "part_features": [
+            {"tag": "A1", "feature_type": "through_hole", "raw_description": "⌀8 THRU ALL",
+             "size": {"dia": 8, "cbore_dia": None, "depth": None}},
+            {"tag": "A2", "feature_type": "counterbore", "raw_description": "⌀6.6 THRU ⌴⌀11 ↧6.5",
+             "size": {"dia": 6.6, "cbore_dia": 11, "cbore_depth": 6.5}},
+            {"tag": "B1", "feature_type": "tapped_hole", "raw_description": "M6x1.0 ↧12",
+             "size": {"dia": None, "depth": 12}},
+            {"tag": "C1", "feature_type": "through_hole", "raw_description": "⌀8 H7 THRU",
+             "size": {"dia": 8}},
+            {"tag": "D1", "feature_type": "countersink", "raw_description": "⌀4.5 THRU ⌵⌀9",
+             "size": {"dia": 4.5, "csk_dia": 9, "csk_angle": 90}},
+            {"tag": "E1", "feature_type": "other", "raw_description": "??", "size": {}},
+        ],
+        "other_features_without_tag": [{"raw_text": "5 x 45°", "size": {}}],
+        "unmatched_tags": [{"tag": "B3", "missing_from": "table"}],
+        "reconciler_notes": {"per_part": ["แถว B3 ขาดในตาราง"], "needs_human_review": True},
+    }
+    s = from_partspec(ps)
+    o = s.ops
+    assert (o.drill, o.counterbore, o.tap_small, o.ream, o.countersink) == (5, 1, 1, 1, 1)
+    assert s.setups == 2                       # blind M6 -> second face suggested
+    whys = [lo["why"] for lo in s.leftovers]
+    assert len(whys) == 3                      # 'other', untagged chamfer, unmatched B3
+    assert "แถว B3 ขาดในตาราง" in s.notes

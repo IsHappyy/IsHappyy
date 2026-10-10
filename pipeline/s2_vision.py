@@ -52,8 +52,14 @@ def run_readers(page_png: bytes, info: dict, *, use_cache: bool = True,
         data, meta = llm.call_json(load_prompt(name), content, use_cache=use_cache)
         outputs[name], metas[name] = data, meta
 
-    if exists(RECONCILER) and len(outputs) >= 2:
-        payload = llm.text_block("ผลจาก reading agents:\n" + json.dumps(outputs, ensure_ascii=False))
+    if exists(RECONCILER) and {"feature_reader", "table_reader"} <= outputs.keys():
+        # reconciler.md stops and asks unless the pair is named explicitly
+        payload = llm.text_block(
+            f"คู่ไฟล์ที่ต้อง reconcile (ยืนยันแล้วว่าเป็นชิ้นงานเดียวกัน: {info.get('file')}):\n"
+            "แหล่งที่ 1 feature_reading.json:\n"
+            + json.dumps(outputs["feature_reader"], ensure_ascii=False)
+            + "\n\nแหล่งที่ 2 table_reading.json:\n"
+            + json.dumps(outputs["table_reader"], ensure_ascii=False))
         data, meta = llm.call_json(load_prompt(RECONCILER),
                                    [llm.image_block(fit_png(page_png, 1600)), payload],
                                    use_cache=use_cache)

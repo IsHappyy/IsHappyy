@@ -17,7 +17,7 @@ import re
 from typing import Any
 
 from . import CONFIG
-from .s2_vector import material_key
+from .s2_vector import material_key, parse_size
 from .schemas import Evidence, Ops, QuoteSpec
 
 HEADER_FIELDS = ["dwg", "name", "material", "material_raw", "t", "L", "W", "qty",
@@ -238,26 +238,33 @@ def hole_from_feature(f: dict, edge_types: set[str]) -> dict:
     this is the one function to adjust when the reconciler output changes.
     """
     ftype = str(_get(f, "feature_type", "type") or "").lower()
+    raw = str(_get(f, "raw_description", "raw_text", "callout", "size.raw") or "")
+    parsed = parse_size(raw.replace("⌀", "").replace("Ø", ""))  # text facts the size{} may omit
     tags = _get(f, "tags", "source_tags") or ([f["tag"]] if f.get("tag") else [])
-    count = _get(f, "count", "quantity", "qty") or (len(tags) if tags else 1)
-    tap, pitch = _thread(_get(f, "size.thread", "thread", "size.thread_spec"))
-    thru_flag = _get(f, "size.thru", "thru", "size.through")
-    dia = _num(_get(f, "size.diameter", "size.drill_diameter", "diameter", "dia"))
-    depth = _num(_get(f, "size.depth", "depth", "size.thread_depth"))
-    fit = str(_get(f, "size.fit", "fit", "size.tolerance", "tolerance") or "")
-    cb_d = _num(_get(f, "size.cbore_diameter", "size.counterbore.diameter", "cbore_diameter"))
+    count = _get(f, "count", "multiplier", "quantity", "qty") or (len(tags) if len(tags) > 1 else 1)
+    tap, pitch = _thread(_get(f, "size.thread", "thread", "size.thread_spec") or raw)
+    thru_flag = (_get(f, "size.thru", "thru", "size.through") is True
+                 or ftype == "through_hole" or bool(parsed["thru"]))
+    dia = _num(_get(f, "size.dia", "size.diameter", "size.drill_diameter", "diameter", "dia")) \
+        or parsed["thru"]
+    depth = _num(_get(f, "size.depth", "depth", "size.thread_depth")) or parsed["depth"]
+    fit = str(_get(f, "size.fit", "fit", "size.tolerance", "tolerance") or "") + " " + raw
+    cb_d = _num(_get(f, "size.cbore_dia", "size.cbore_diameter", "size.counterbore.diameter",
+                     "cbore_diameter"))
     cb_h = _num(_get(f, "size.cbore_depth", "size.counterbore.depth", "cbore_depth"))
     if ftype in ("counterbore", "cbore", "spotface") and not cb_d:
         cb_d, cb_h = dia, depth
+    csk = (ftype in ("countersink", "csk")
+           or bool(_get(f, "size.csk_dia", "size.csk_angle", "size.countersink", "size.csk")))
     return {
-        "count": int(count), "dia": dia, "depth": depth,
-        "thru": True if thru_flag is True else None,
-        "tap": tap, "tap_pitch": pitch, "blind": bool(tap) and thru_flag is not True,
+        "count": int(_num(count) or 1), "dia": dia, "depth": depth,
+        "thru": True if thru_flag else None,
+        "tap": tap, "tap_pitch": pitch, "blind": bool(tap) and not thru_flag,
         "ream": bool(re.search(r"\b[HG][67]\b", fit)),
         "cbore": [cb_d, cb_h or 0] if cb_d else None,
-        "csk": ftype in ("countersink", "csk") or bool(_get(f, "size.countersink", "size.csk")),
+        "csk": csk,
         "edge": ftype in edge_types or str(_get(f, "face", "direction") or "").lower() in ("side", "edge"),
-        "raw": str(_get(f, "raw_text", "callout", "size.raw") or ftype),
+        "raw": raw or ftype,
     }
 
 
@@ -319,8 +326,14 @@ def from_partspec(ps: dict, feature_map: dict | None = None,
     spec.ops.slot_mm, spec.ops.pocket_cm3 = slot, pocket
     if ignored:
         spec.evidence["ops"].note = f"ไม่คิด chamfer/fillet {ignored} จุด (รวมในเวลา deburr แล้ว)"
-    for u in _get(ps, "unmatched", "unmatched_features") or []:
-        spec.leftovers.append({"why": "reconciler จับคู่ไม่ได้", "feature": u})
+    for u in _get(ps, "unmatched_tags", "unmatched", "unmatched_features") or []:
+        spec.leftovers.append({"why": "reconciler จับคู่ tag ไม่ได้", "feature": u})
+    for u in _get(ps, "other_features_without_tag") or []:
+        spec.leftovers.append({"why": "feature ไม่มี tag — คนต้องตัดสินจำนวน/ว่าคิดราคาไหม",
+                               "feature": u})
+    for n in _get(ps, "reconciler_notes.per_part") or []:
+        if n not in spec.notes:
+            spec.notes.append(str(n))
     return spec
 
 
