@@ -60,6 +60,7 @@ def run(pdf: str | Path, out_root: Path = RUNS, vector_only: bool = False,
     (out / "page.png").write_bytes(page_png)
 
     spec = QuoteSpec()
+    vec = None
     if info["verdict"] in ("VECTOR", "MIXED"):
         vec = extract(pdf)
         _dump(out / "vector.json", vec)
@@ -68,18 +69,33 @@ def run(pdf: str | Path, out_root: Path = RUNS, vector_only: bool = False,
     vision = None
     if not vector_only:
         from . import llm
-        from .s2_vision import RECONCILER, run_readers
+        from .s2_vision import RECONCILER, run_readers, run_tag_path
         llm.load_dotenv()
         info["text"] = (out / "text_layer.txt").read_text(encoding="utf-8")
-        vision = run_readers(page_png, info, use_cache=use_cache)
+        tt = (vec or {}).get("table_bbox") if info["verdict"] in ("VECTOR", "MIXED") else None
+        if tt and (vec or {}).get("read_path") == "tag_table":
+            vision = run_tag_path(page_png, info, vec, tt, use_cache=use_cache)
+        else:
+            vision = run_readers(page_png, info, use_cache=use_cache)
         info.pop("text")
         _dump(out / "vision.json", vision)
         outs = vision["outputs"]
-        rec = outs.get(RECONCILER) or outs.get("feature_reader")
-        if isinstance(rec, dict):
-            if "title" not in rec and isinstance(outs.get("title_reader"), dict):
-                rec = {**rec, "title": outs["title_reader"]}
-            spec = merge(spec, from_partspec(rec)) if spec.evidence else from_partspec(rec)
+        join = vision.get("tag_join")
+        if join is not None:
+            # tag mode: holes come from the table; vision only adds non-hole features
+            for side, tags in (("ภาพ", join["only_feature"]), ("ตาราง", join["only_table"])):
+                for t in tags:
+                    spec.leftovers.append({"why": f"tag {t} มีเฉพาะใน{side} — จับคู่ไม่ได้",
+                                           "feature": {"tag": t}})
+            fr = outs.get("feature_reader")
+            if isinstance(fr, dict) and fr.get("features"):
+                spec = merge(spec, from_partspec(fr))
+        else:
+            rec = outs.get(RECONCILER) or outs.get("feature_reader")
+            if isinstance(rec, dict):
+                if "title" not in rec and isinstance(outs.get("title_reader"), dict):
+                    rec = {**rec, "title": outs["title_reader"]}
+                spec = merge(spec, from_partspec(rec)) if spec.evidence else from_partspec(rec)
 
     spec.template = (info.get("template_guess") or {}).get("template")
     spec.from_scan = info["verdict"] == "SCAN"

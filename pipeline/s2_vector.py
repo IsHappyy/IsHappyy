@@ -260,6 +260,7 @@ def extract(path: str | Path) -> dict:
         "tolerance_class": tol,
         "has_revision_block": bool(re.search(r"REVISIONS?\s+HISTORY", text, re.I)),
         "read_path": "tag_table" if tt else "callout",
+        "table_bbox": tt["bbox"] if tt else None,
         "hole_groups": groups,
         "size_candidates_mm": size_candidates,
         "unmatched_numbers": unmatched[:60],
