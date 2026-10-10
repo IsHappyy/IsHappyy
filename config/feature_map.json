@@ -1,0 +1,12 @@
+{
+  "_comment": "Maps the feature_type enum of the reconciler prompt (v3) to how pipeline/s3_assemble.py prices it. Keys are lower-cased before lookup. A feature_type that is not listed here goes to `leftovers` and blocks the quote until a human decides - it is never dropped silently. CHECK these names against the enum in prompts/reconciler.md.",
+  "hole": ["through_hole", "thru_hole", "blind_hole", "hole", "drilled_hole", "edge_drilled_hole", "edge_hole", "reamed_hole", "dowel_hole"],
+  "tapped_hole": ["tapped_hole", "thread", "threaded_hole", "tap"],
+  "counterbore": ["counterbore", "cbore", "spotface"],
+  "countersink": ["countersink", "csk"],
+  "slot": ["slot"],
+  "pocket": ["pocket", "step", "recess"],
+  "lathe": ["turned_diameter", "groove", "turning", "od", "id"],
+  "no_op": ["chamfer", "fillet", "edge_break", "radius"],
+  "edge_direction": ["edge_drilled_hole", "edge_hole", "side_hole"]
+}

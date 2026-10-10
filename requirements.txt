@@ -1,0 +1,6 @@
+anthropic>=1.13
+pydantic>=2.10
+pymupdf>=1.25
+pillow>=10.0
+streamlit>=1.40
+pytest>=8.0

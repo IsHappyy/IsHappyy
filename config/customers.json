@@ -1,0 +1,17 @@
+{
+  "_comment": "Template detection by code, not by AI. Rules match the PDF text layer and the file name. Scans have no text layer, so for Summit the file/folder name is usually the only signal - otherwise the human picks the template in the checkpoint app. Edit the patterns to match real TPT files.",
+  "templates": {
+    "Pioneer": {
+      "text_patterns": ["\\bTK-\\d{4}", "\\bX LOC\\b", "\\bDwg No\\."],
+      "filename_patterns": ["(?i)pioneer", "TK-\\d{4}"],
+      "min_hits": 1,
+      "notes": "Vector PDF from CAD, decimal point, hole table TAG|X LOC|Y LOC|SIZE, symbols diameter/counterbore/countersink/depth (Pioneer-only convention)."
+    },
+    "Summit": {
+      "text_patterns": ["(?i)summit", "EDI4-4-006", "(?i)auto\\s*body"],
+      "filename_patterns": ["(?i)summit", "EDI4"],
+      "min_hits": 1,
+      "notes": "Mostly scans (5 sub-templates A-E). Depth arrow differs from Pioneer, counterbore often drawn as stacked diameters, triangles = surface finish level."
+    }
+  }
+}

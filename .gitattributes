@@ -1,0 +1,4 @@
+# prompts are hashed; keep line endings identical on Windows and Linux
+*.md   text eol=lf
+*.json text eol=lf
+*.py   text eol=lf

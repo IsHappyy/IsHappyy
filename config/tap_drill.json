@@ -1,0 +1,14 @@
+{
+  "_comment": "ISO metric coarse threads, tap drill = D - P. tap_small/tap_large follow shop_profile ops (M3-M8 small, M10-M16 large). Add fine pitches here when a customer uses them.",
+  "threads": {
+    "M3":  { "pitch": 0.5,  "drill": 2.5,  "class": "tap_small" },
+    "M4":  { "pitch": 0.7,  "drill": 3.3,  "class": "tap_small" },
+    "M5":  { "pitch": 0.8,  "drill": 4.2,  "class": "tap_small" },
+    "M6":  { "pitch": 1.0,  "drill": 5.0,  "class": "tap_small" },
+    "M8":  { "pitch": 1.25, "drill": 6.8,  "class": "tap_small" },
+    "M10": { "pitch": 1.5,  "drill": 8.5,  "class": "tap_large" },
+    "M12": { "pitch": 1.75, "drill": 10.2, "class": "tap_large" },
+    "M14": { "pitch": 2.0,  "drill": 12.0, "class": "tap_large" },
+    "M16": { "pitch": 2.0,  "drill": 14.0, "class": "tap_large" }
+  }
+}

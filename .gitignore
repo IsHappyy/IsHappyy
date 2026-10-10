@@ -1,0 +1,13 @@
+.env
+__pycache__/
+*.pyc
+.pytest_cache/
+.venv/
+venv/
+
+# run outputs and the LLM cache - reproducible from inputs + prompt sha
+runs/
+
+# customer drawings stay out of git (confidential); keep the folder
+samples/*
+!samples/README.md

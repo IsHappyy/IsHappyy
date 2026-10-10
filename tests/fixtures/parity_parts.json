@@ -1,0 +1,7 @@
+{"parts":[
+{"dwg":"PO10-1 item 1320","name":"P10-BASE NO.1B1","material":"STEEL_MILD","t":16,"L":605,"W":263,"qty":1,"setups":1,"shape":"complex","tolerance":"h7","finish":"none","from_scan":true,"hole_circumference_mm":1150,"ops":{"drill":60,"ream":26,"tap_small":16,"tap_large":6},"notes":["อ่านจากสแกน ต้องให้คนตรวจซ้ำทุกตัวเลข"]},
+{"dwg":"TK-3040-01A","name":"BASE","material":"AL","t":10,"L":380,"W":300,"qty":1,"setups":1,"shape":"rect","tolerance":"general","finish":"anodize","lathe":false,"from_scan":false,"hole_circumference_mm":285,"ops":{"drill":8,"counterbore":7,"tap_small":1}},
+{"dwg":"TK-3040-02","name":"COVER","material":"AL","t":5,"L":120,"W":80,"qty":4,"setups":2,"shape":"notched","tolerance":"pm05","finish":"anodize","ops":{"drill":4,"countersink":4,"slot_mm":60,"pocket_cm3":12}},
+{"dwg":"TK-3040-03","name":"PIN","material":"SUS","t":20,"L":45,"W":20,"qty":10,"setups":1,"lathe":true,"tolerance":"pm01","finish":"none","ops":{"drill":1,"tap_small":1}},
+{"dwg":"X-1","name":"PLATE","material":"STEEL_TOOL","t":2,"L":40,"W":30,"qty":1,"setups":3,"finish":"black_oxide","ops":{"drill_deep":2,"bore_circular":1}}
+]}

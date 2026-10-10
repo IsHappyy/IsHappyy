@@ -1,0 +1,86 @@
+{
+  "_comment": "TPT shop profile. Every number here is a DEFAULT, not a measurement. Tune from the check sheet once real times are logged.",
+  "shop": "Thai Precision Tool, Ayutthaya",
+  "currency": "THB",
+
+  "rates_per_hour": { "machine": 750, "hand": 350, "programming": 600 },
+  "margin_pct": 0,
+
+  "machine_limits": {
+    "max_travel_x_mm": 600,
+    "max_travel_y_mm": 400,
+    "max_part_weight_kg": 60,
+    "_note": "Only used to raise a flag when a part exceeds them. Edit to match the real machines."
+  },
+
+  "time_min": {
+    "profile_per_100mm_per_10mm_depth": 0.25,
+    "drill": 0.4,
+    "drill_deep": 0.8,
+    "ream": 0.7,
+    "counterbore": 0.5,
+    "tap_small": 0.4,
+    "tap_large": 0.6,
+    "countersink": 0.25,
+    "bore_circular": 1.5,
+    "chamfer_per_100mm": 0.15,
+    "pocket_per_cm3": 0.03,
+    "slot_per_100mm": 0.4,
+    "tool_change": 0.3,
+    "load_light": 1.5,
+    "load_medium": 4.0,
+    "load_heavy": 8.0,
+    "probe_per_setup": 4.0,
+    "deburr_per_100mm": 0.25,
+    "inspect_pack": 1.0,
+    "program_base": 15,
+    "program_per_feature_type": 3,
+    "setup_first": 20,
+    "setup_additional": 15,
+    "prove_out": 10,
+    "lathe_base": 3.2,
+    "lathe_per_10mm_dia": 0.8
+  },
+
+  "load_weight_breaks_kg": [2, 10],
+
+  "material_multiplier": {
+    "AL": 1.0, "BRASS": 0.9, "PLASTIC": 0.7,
+    "STEEL_MILD": 2.0, "STEEL_TOOL": 4.0, "SUS": 3.0
+  },
+  "density_g_cm3": {
+    "AL": 2.66, "BRASS": 8.5, "PLASTIC": 1.42,
+    "STEEL_MILD": 7.85, "STEEL_TOOL": 7.85, "SUS": 7.90
+  },
+  "material_price_per_kg": {
+    "AL": 300, "BRASS": 420, "PLASTIC": 450,
+    "STEEL_MILD": 45, "STEEL_TOOL": 260, "SUS": 180
+  },
+  "stock_allowance_pct": 12,
+
+  "finishing": {
+    "anodize":     { "per_m2": 450, "min_lot": 1000 },
+    "black_oxide": { "per_m2": 380, "min_lot": 800 },
+    "zinc_plate":  { "per_m2": 320, "min_lot": 800 },
+    "none":        { "per_m2": 0,   "min_lot": 0 }
+  },
+
+  "tolerance_multiplier": { "general": 1.0, "pm05": 1.15, "h7": 1.4, "pm01": 1.8 },
+  "shape_multiplier": { "rect": 1.0, "notched": 1.35, "complex": 1.7 },
+
+  "risk_premium_pct": {
+    "setup_count_uncertain": 8,
+    "no_tolerance_block": 12,
+    "scanned_drawing": 10,
+    "finish_unspecified": 5,
+    "material_unclear": 10,
+    "qty_one": 15,
+    "_cap": 35,
+    "_note": "Sum the ones that apply. If the sum exceeds _cap, do not auto-quote — hand it to a human."
+  },
+
+  "shop_calibration_K": {
+    "machine": 1.0, "hand": 1.0, "programming": 1.0,
+    "_note": "K = actual time / predicted time, from the check sheet. Leave at 1.0 until 15+ jobs are logged."
+  }
+}
