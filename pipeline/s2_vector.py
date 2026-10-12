@@ -57,7 +57,8 @@ def material_key(s: str) -> str | None:
 def parse_size(t: str) -> dict:
     """One SIZE-column / callout string -> feature dict."""
     f = {"thru": None, "tap": None, "tap_pitch": None, "cbore": None,
-         "csk": False, "bore": None, "blind": False, "ream": False, "depth": None}
+         "csk": False, "bore": None, "blind": False, "ream": False, "depth": None,
+         "far_side": bool(re.search(r"FAR\s*SIDE", t, re.I))}
     m = re.search(r"([\d.]+)\s*THRU", t, re.I)
     if m:
         f["thru"] = float(m.group(1))

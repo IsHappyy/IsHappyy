@@ -119,6 +119,8 @@ def ops_for_hole(h: dict, tap_table: dict | None = None) -> tuple[Ops, float, li
         circ_d = max(circ_d, h["cbore"][0])
     if h.get("csk"):
         ops.countersink += n
+    if h.get("far_side"):
+        setup.append(f"งานด้านตรงข้าม (Far Side) {n}× ({raw})")
     if h.get("edge"):
         setup.append(f"รูด้านข้าง {n}× ({raw})")
     return ops, math.pi * circ_d * n, notes, setup
@@ -128,7 +130,8 @@ def suggest_setups(reasons: list[str]) -> tuple[int, str]:
     """1 setup, +1 for blind holes (usually a 2nd face), +1 for side/edge holes."""
     blind = any(r.startswith(("เกลียวตัน", "รูตัน")) for r in reasons)
     edge = any(r.startswith("รูด้านข้าง") for r in reasons)
-    n = 1 + int(blind) + int(edge)
+    far = any(r.startswith("งานด้านตรงข้าม") for r in reasons)
+    n = 1 + int(blind or far) + int(edge)
     why = "; ".join(reasons) if reasons else "ไม่พบงานจากด้านอื่น"
     return n, why
 
@@ -263,6 +266,7 @@ def hole_from_feature(f: dict, edge_types: set[str]) -> dict:
         "ream": bool(re.search(r"\b[HG][67]\b", fit)),
         "cbore": [cb_d, cb_h or 0] if cb_d else None,
         "csk": csk,
+        "far_side": bool(re.search(r"FAR\s*SIDE", raw, re.I)),
         "edge": ftype in edge_types or str(_get(f, "face", "direction") or "").lower() in ("side", "edge"),
         "raw": raw or ftype,
     }

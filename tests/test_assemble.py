@@ -125,3 +125,14 @@ def test_reconciler_v3_schema():
     whys = [lo["why"] for lo in s.leftovers]
     assert len(whys) == 3                      # 'other', untagged chamfer, unmatched B3
     assert "แถว B3 ขาดในตาราง" in s.notes
+
+
+def test_far_side_countersink_needs_second_setup():
+    """TK-2638-01A: C1 '9.10 THRU ALL | 12 X 90°, Far Side'."""
+    from pipeline.s2_vector import parse_size
+    f = parse_size("9.10 THRU ALL | 12 X 90°, Far Side")
+    assert f["csk"] and f["far_side"]
+    ops, _, _, setup = ops_for_hole({**f, "count": 1, "raw": "C1"})
+    assert ops.countersink == 1 and ops.drill == 1
+    from pipeline.s3_assemble import suggest_setups
+    assert suggest_setups(setup)[0] == 2
