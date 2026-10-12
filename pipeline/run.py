@@ -134,7 +134,7 @@ def main(argv=None) -> int:
     print(f"ไฟล์ {man['file']} · {man['verdict']} · template {man['template_guess']['template']}"
           f" · prompts {man['prompts'] or '-'}")
     if man["skipped_prompts"]:
-        print(f"ข้าม prompt ที่ยังไม่มีใน prompts/: {', '.join(man['skipped_prompts'])}")
+        print(f"ข้าม: {', '.join(man['skipped_prompts'])}")
     for f in res["flags"]:
         print(f"  [{f['level']}] {f['msg']}")
     if res["price"]:

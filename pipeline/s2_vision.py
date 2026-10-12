@@ -47,7 +47,7 @@ def run_readers(page_png: bytes, info: dict, *, use_cache: bool = True,
     outputs, metas, skipped = {}, {}, []
     for name in readers or READERS:
         if not exists(name):
-            skipped.append(name)
+            skipped.append(f"{name} (ยังไม่มีใน prompts/)")
             continue
         data, meta = llm.call_json(load_prompt(name), content, use_cache=use_cache)
         outputs[name], metas[name] = data, meta
