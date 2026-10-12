@@ -23,7 +23,7 @@ import streamlit as st
 from pipeline import RUNS
 from pipeline.run import check
 from pipeline.s1_ingest import render_png
-from pipeline.s6_price import format_table, load_profile
+from pipeline.s6_price import format_table, load_profile, offer
 from pipeline.schemas import OP_KEYS, Evidence, Ops, QuoteSpec
 
 st.set_page_config(page_title="TPT ตรวจแบบ + ราคา", layout="wide")
@@ -188,13 +188,27 @@ with left:
         pr = result["price"]
         row = pr["parts"][0]
         st.subheader("ราคา")
-        m1, m2, m3 = st.columns(3)
-        m1.metric("รวม (บาท)", f"{pr['grand_total']:,}")
-        m2.metric("ต่อชิ้น (บาท)", f"{row['each']:,}")
-        m3.metric("ช่วงที่ควรเสนอ", f"{pr['band'][0]:,} – {pr['band'][1]:,}")
-        st.caption(f"เครื่อง {row['machine_min']:.0f} นาที · มือ {row['hand_min']:.0f} · เตรียม "
-                   f"{row['prog_min']:.0f} · ค่าแรง {row['labour']:,} · วัสดุ {row['material_cost']:,} "
-                   f"· ผิว {row['finish_cost']:,}")
+        cost = pr["grand_total"] / (1 + P["margin_pct"] / 100)
+        c1, c2 = st.columns(2)
+        markup = c1.number_input("กำไรที่ต้องการ (% บวกจากต้นทุน)", value=25.0, min_value=0.0,
+                                 step=5.0, key=f"{key}:markup")
+        use_risk = c2.checkbox(f"บวกค่าเผื่อความเสี่ยง {risk['total_pct']}%", value=True,
+                               key=f"{key}:userisk")
+        base = offer(cost, risk["total_pct"] if use_risk else 0, markup)
+        offered = st.number_input("ราคาที่จะเสนอจริง (บาท) — แก้ได้", value=float(base["suggested"]),
+                                  min_value=0.0, step=10.0, key=f"{key}:offered:{base['suggested']}")
+        o = offer(cost, base["risk_pct"], markup, offered)
+        m1, m2, m3, m4 = st.columns(4)
+        m1.metric("ต้นทุนจริง", f"{o['cost']:,} ฿")
+        m2.metric("ควรเสนอ", f"{o['suggested']:,} ฿")
+        m3.metric("กำไร", f"{o['profit']:,} ฿", delta=f"{o['profit_pct']}% ของราคาขาย")
+        m4.metric("ต่อชิ้น", f"{round(o['offered'] / max(row['qty'], 1)):,} ฿")
+        if o["profit"] < 0:
+            st.error("ราคาที่เสนอต่ำกว่าต้นทุน — ขาดทุน")
+        st.caption(f"ต้นทุน = ค่าแรง {row['labour']:,} + วัสดุ {row['material_cost']:,} + ผิว "
+                   f"{row['finish_cost']:,} · เครื่อง {row['machine_min']:.0f} นาที · มือ "
+                   f"{row['hand_min']:.0f} · เตรียม {row['prog_min']:.0f} · ควรเสนอ = ต้นทุน × "
+                   f"(1+{o['risk_pct']}% เสี่ยง) × (1+{markup:g}% กำไร) ปัดขึ้นหลักสิบ")
         with st.expander("ตารางเต็ม"):
             st.code(format_table(pr), language=None)
     else:
@@ -214,5 +228,6 @@ with left:
                                               encoding="utf-8")
         (out / "corrections.json").write_text(json.dumps(
             {"review_seconds": round(time.time() - started), "saved": datetime.now().isoformat(),
+             "offer": o,
              "corrections": corrections}, ensure_ascii=False, indent=1, default=str), encoding="utf-8")
         st.success(f"บันทึกแล้วที่ {out} — แก้ไป {len(corrections)} ช่อง")

@@ -178,3 +178,20 @@ def format_table(result: dict) -> str:
     lo, hi = result["band"]
     out.append(f"ช่วงที่ควรเสนอ {lo:,} – {hi:,} บาท")
     return "\n".join(out)
+
+
+def offer(cost: float, risk_pct: float, markup_pct: float, offered: float | None = None) -> dict:
+    """Cost -> suggested quote -> profit.
+
+    cost       = estimate total with margin_pct removed (the shop's real cost)
+    suggested  = cost x (1 + risk%) x (1 + markup%), rounded up to 10 baht
+    profit_pct = profit / offered price (margin on the selling price)
+    """
+    suggested = math.ceil(cost * (1 + risk_pct / 100) * (1 + markup_pct / 100) / 10) * 10
+    price = suggested if offered is None else offered
+    profit = price - cost
+    return {"cost": round(cost), "risk_pct": risk_pct, "markup_pct": markup_pct,
+            "suggested": suggested, "offered": round(price),
+            "profit": round(profit),
+            "profit_pct": round(profit / price * 100, 1) if price else None,
+            "markup_on_cost_pct": round(profit / cost * 100, 1) if cost else None}
