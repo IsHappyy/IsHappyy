@@ -56,6 +56,13 @@ def material_key(s: str) -> str | None:
 
 def parse_size(t: str) -> dict:
     """One SIZE-column / callout string -> feature dict."""
+    # no4-style text layer: the font maps Ø->"P", counterbore->"X", depth->"Z", and
+    # THRU wraps onto its own line ("P4.90 | THRU", "X P6.50 Z | 3.00")
+    cb = re.search(r"\bX\s*P?\s*([\d.]+)\s*Z\s*\|?\s*([\d.]+)", t)
+    t = re.sub(r"\bP(?=\d)", "", t)
+    t = re.sub(r"\s*\|\s*THRU", " THRU", t, flags=re.I)
+    if cb:
+        t = t[:t.find("X")].rstrip(" |") if "X" in t else t
     f = {"thru": None, "tap": None, "tap_pitch": None, "cbore": None,
          "csk": False, "bore": None, "blind": False, "ream": False, "depth": None,
          "far_side": bool(re.search(r"FAR\s*SIDE", t, re.I))}
@@ -68,10 +75,12 @@ def parse_size(t: str) -> dict:
         f["tap_pitch"] = float(m.group(2))
         tail = t[m.start():m.start() + 40].upper()
         if "THRU" not in tail:
-            f["blind"] = True
             d = re.search(r"6H\s*[^\d]*([\d.]+)", tail)
-            if d:
+            if d:  # blind only when a depth is called out; "M4x0.7 - 6H" alone = through
                 f["depth"] = float(d.group(1))
+                f["blind"] = True
+    if cb:
+        f["cbore"] = [float(cb.group(1)), float(cb.group(2))]
     if re.search(r"[xX]\s*90", t):
         f["csk"] = True
     if re.search(r"\bH[67]\b|\bREAM|\bG[67]\b", t, re.I):
@@ -89,7 +98,12 @@ def parse_size(t: str) -> dict:
 
 
 def tag_table(ws):
-    hdr = next((w for w in ws if w["s"] == "TAG"), None)
+    # header cell: TAG (no3 style) or HOLE (no4 style, "HOLE | XDIM | YDIM | DESCRIPTION");
+    # pick the one sharing a row with the size column header, not the "HOLE TABLE" title
+    sizes = [w for w in ws if w["s"] in ("SIZE", "DESCRIPTION")]
+    heads = [w for w in ws if w["s"] in ("TAG", "HOLE")
+             and any(abs(w["y"] - z["y"]) < 5 for z in sizes)]
+    hdr = heads[0] if heads else next((w for w in ws if w["s"] == "TAG"), None)
     if not hdr:
         return None
     tags = sorted([w for w in ws
@@ -99,8 +113,12 @@ def tag_table(ws):
     if len(tags) < 3:
         return None
     y_end = tags[-1]["y"] + 22
-    sz = next((w for w in ws if w["s"] == "SIZE" and abs(w["y"] - hdr["y"]) < 5), None)
+    sz = next((w for w in ws if w["s"] in ("SIZE", "DESCRIPTION") and abs(w["y"] - hdr["y"]) < 5), None)
     sx = (sz["x"] - 80) if sz else hdr["x"] + 150
+    if sz:  # never reach back into the Y column (no4: YDIM sits 56pt left of DESCRIPTION)
+        row = [w for w in ws if abs(w["y"] - hdr["y"]) < 5 and w["x"] < sz["x"]]
+        if row:
+            sx = max(sx, max(w["x2"] for w in row) + 2)
 
     rows: dict[int, list] = {}
     for w in ws:
@@ -199,7 +217,7 @@ def extract(path: str | Path) -> dict:
     text = "\n".join(l["s"] for l in lines)
 
     claimed = set()
-    mat_t, mat_ws = cell(ws, ["MATERIAL", "MATREIAL"])
+    mat_t, mat_ws = cell(ws, ["MATERIAL", "MATREIAL", "METERIAL"])
     fin_t, fin_ws = cell(ws, ["FINISHING"])
     qty_t, qty_ws = cell(ws, ["Q'TY", "QTY"])
     nam_t, nam_ws = cell(ws, ["PART", "NAME"], pad=30)

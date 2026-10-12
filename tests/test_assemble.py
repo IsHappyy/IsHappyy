@@ -136,3 +136,14 @@ def test_far_side_countersink_needs_second_setup():
     assert ops.countersink == 1 and ops.drill == 1
     from pipeline.s3_assemble import suggest_setups
     assert suggest_setups(setup)[0] == 2
+
+
+def test_no4_style_description_cells():
+    """TK-2667-01A text layer: Ø->'P', counterbore->'X', depth->'Z', THRU wrapped."""
+    from pipeline.s2_vector import parse_size
+    assert parse_size("P4.90 | THRU")["thru"] == 4.9
+    g = parse_size("P5.50 | THRU | X P10.00 Z | 5.00")
+    assert g["thru"] == 5.5 and g["cbore"] == [10.0, 5.0]
+    m = parse_size("M4x0.7 - 6H")
+    assert m["tap"] == 4.0 and not m["blind"]          # no depth called out -> through
+    assert parse_size("M6x1.0 - 6H 12")["blind"]
