@@ -2,14 +2,36 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-## Repository Status
+## What this is
 
-This repository is currently empty — no source files, build system, or configuration exist yet. This CLAUDE.md should be updated once the project is bootstrapped with actual code.
+A Python pipeline that turns a topic into a Thai short video (TikTok / YouTube Shorts) for a
+health / sports / news explainer channel with a cartoon mascot. User-facing docs are in Thai (`README.md`).
 
-## Getting Started
+## Commands
 
-When the project is set up, update this file with:
+```bash
+pip install -r requirements.txt          # needs ffmpeg/ffprobe on PATH
+python run.py ideas <category>           # topic ideas (Claude + web search)
+python run.py new "<topic>"              # research.md + script.json in projects/<stamp>_<slug>/
+python run.py render projects/<dir> [--voice silent]   # audio, subtitles.srt, final.mp4
+```
 
-- **Build/lint/test commands** — how to install dependencies, build, run the linter, and execute the test suite (including how to run a single test file or test case).
-- **Architecture overview** — the high-level structure of the codebase (e.g. monorepo layout, service boundaries, data flow, key abstractions) that isn't obvious from reading individual files.
-- **Key conventions** — non-obvious decisions about code style, naming, or patterns enforced in this project that differ from framework defaults.
+`--voice silent` plus placeholder images lets `render` run fully offline — use it to test
+changes to subtitles/visuals/assembly without API keys. There is no test suite yet.
+
+## Architecture
+
+`run.py` is the orchestrator: each step writes a file into the project folder and the next
+step reads it, so a human can review/edit between steps (especially `script.json` before render).
+
+- `shorts/claude.py` — single `ask()` helper: Claude API via `client.beta.messages.create`
+  with `fallbacks="default"`, `pause_turn` continuation, and optional JSON-schema output.
+- `shorts/research.py` → web search/fetch server tools → Thai research notes with URLs.
+- `shorts/script.py` → strict JSON schema (`SCRIPT_SCHEMA`) of scenes: narration, on-screen text, image prompt.
+- `shorts/voice.py` → per-scene mp3 via `PROVIDERS` registry (add new TTS vendors there).
+- `shorts/subtitles.py` → SRT built from script text + audio durations (no speech recognition).
+- `shorts/visuals.py` → uses `images/scene_XX.png` if present, else pastel placeholders; writes `images/prompts.txt`.
+- `shorts/assemble.py` → FFmpeg zoompan per scene, concat, burn subtitles.
+
+Channel persona (mascot, tone, art style, sign-off) lives in `channel.json` and is injected into the script prompt.
+Secrets go in `.env` (git-ignored); `projects/` output is git-ignored.
