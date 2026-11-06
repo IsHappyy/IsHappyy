@@ -1,0 +1,17 @@
+{
+  "closed": null,
+  "customer": "Pioneer",
+  "due": "2026-11-03",
+  "id": "J12",
+  "issue": "รอ Supplier จัดทำ",
+  "jigNo": "TS-1624",
+  "name": null,
+  "note": "",
+  "owner": "Pichakorn",
+  "po": null,
+  "qty": 1,
+  "seq": 12,
+  "stage": "ready",
+  "stageAt": null,
+  "updated": "2026-10-16"
+}

@@ -1,0 +1,15 @@
+{
+  "id": "J09-P3",
+  "jigId": "J09",
+  "name": "KX-1554-03A",
+  "pos": 2,
+  "spec": "",
+  "steps": [
+    {
+      "end": null,
+      "op": "machining",
+      "start": null,
+      "state": "doing"
+    }
+  ]
+}

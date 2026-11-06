@@ -1,0 +1,17 @@
+{
+  "closed": null,
+  "customer": "Pioneer",
+  "due": "2026-10-28",
+  "id": "J09",
+  "issue": "",
+  "jigNo": "KX-1554",
+  "name": null,
+  "note": "",
+  "owner": "Pichakorn",
+  "po": "PO27002730",
+  "qty": 1,
+  "seq": 9,
+  "stage": "prep",
+  "stageAt": null,
+  "updated": "2026-10-15"
+}

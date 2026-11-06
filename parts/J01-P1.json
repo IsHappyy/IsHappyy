@@ -1,0 +1,21 @@
+{
+  "id": "J01-P1",
+  "jigId": "J01",
+  "name": "ER-0047",
+  "pos": 0,
+  "spec": "",
+  "steps": [
+    {
+      "end": null,
+      "op": "machining",
+      "start": null,
+      "state": "done"
+    },
+    {
+      "end": null,
+      "op": "outside",
+      "start": null,
+      "state": "wait"
+    }
+  ]
+}

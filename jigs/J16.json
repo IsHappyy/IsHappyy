@@ -1,0 +1,17 @@
+{
+  "closed": null,
+  "customer": "Canon",
+  "due": "2026-11-11",
+  "id": "J16",
+  "issue": "รอ Supplier จัดทำ",
+  "jigNo": "BZ23-T740-1J",
+  "name": "Nozzle Head Heat",
+  "note": "",
+  "owner": "Pichakorn",
+  "po": "PO251100102888",
+  "qty": 8,
+  "seq": 16,
+  "stage": "prep",
+  "stageAt": null,
+  "updated": "2026-09-12"
+}

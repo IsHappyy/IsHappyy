@@ -1,0 +1,17 @@
+{
+  "closed": null,
+  "customer": "Pioneer",
+  "due": "2026-10-26",
+  "id": "J02",
+  "issue": "",
+  "jigNo": "TX-0481",
+  "name": null,
+  "note": "",
+  "owner": "Pichakorn",
+  "po": null,
+  "qty": 1,
+  "seq": 2,
+  "stage": "ready",
+  "stageAt": "2026-10-21T13:00:15.495Z",
+  "updated": "2026-10-21T13:00:15.495Z"
+}

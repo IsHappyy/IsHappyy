@@ -1,0 +1,2124 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0e7a5f">
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="icon" href="/icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/icon.svg">
+<title>บอร์ดงาน Jig</title>
+<!-- ฟอนต์และสไตล์อยู่ในเครื่องเซิร์ฟเวอร์ทั้งหมด ไม่ต้องใช้อินเทอร์เน็ต -->
+<link rel="stylesheet" href="/vendor/fonts/fonts.css?v=4">
+<link rel="stylesheet" href="/app.css?v=5">
+</head>
+<body data-view="table">
+<a class="skip" href="#main">ข้ามไปเนื้อหา</a>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-mine" viewBox="0 0 24 24"><path d="M9 6h11M9 12h11M9 18h11M4 6l1 1 2-2M4 12l1 1 2-2M4 18l1 1 2-2" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="i-kanban" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="5" height="16" rx="1"/><rect x="10" y="4" width="5" height="10" rx="1"/><rect x="17" y="4" width="4" height="13" rx="1"/></g></symbol>
+  <symbol id="i-table" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 10h18M9 10v10"/></g></symbol>
+  <symbol id="i-more" viewBox="0 0 24 24"><g fill="currentColor"><circle cx="5" cy="12" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="19" cy="12" r="1.8"/></g></symbol>
+  <symbol id="i-search" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></g></symbol>
+  <symbol id="i-eye" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></g></symbol>
+  <symbol id="i-lock" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></g></symbol>
+  <symbol id="i-alert" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v6M12 16.5v.5"/></g></symbol>
+</svg>
+
+<div class="app">
+  <aside class="side" aria-label="เมนูหลัก">
+    <div class="brand"><img src="/icon.svg" alt=""><div><b>บอร์ดงาน Jig</b><small>Jig / Fixture</small></div></div>
+    <nav class="side-nav" role="tablist" aria-label="หน้า">
+      <button class="tab" role="tab" data-view="mine" id="tab-mine">งานของฉัน<span class="n" id="n-mine"></span></button>
+      <button class="tab" role="tab" data-view="table" id="tab-table">ตาราง<span class="n" id="n-table"></span></button>
+      <button class="tab" role="tab" data-view="kanban" id="tab-kanban">Kanban</button>
+      <button class="tab" role="tab" data-view="orders" id="tab-orders">สั่งซื้อ / จ้างทำ<span class="n" id="n-orders"></span></button>
+      <button class="tab" role="tab" data-view="archive" id="tab-archive">คลังงาน<span class="n" id="n-archive"></span></button>
+    </nav>
+    <div class="side-sec">ข้อมูล</div>
+    <button id="backup" class="side-link" type="button">สำรองข้อมูล</button>
+    <span class="grow"></span>
+    <button id="user-chip" class="user-chip" type="button" hidden></button>
+  </aside>
+
+  <div class="col">
+    <header class="top">
+      <div class="wrap top-row">
+        <h1 class="page-title" id="page-title">ตาราง</h1>
+        <div class="tools" id="tools">
+          <label class="search"><svg class="ico" aria-hidden="true"><use href="#i-search"/></svg><input id="f-q" type="search" placeholder="ค้นหา Jig No, PO, ชิ้นส่วน" aria-label="ค้นหา"></label>
+          <select id="f-cust" class="field" aria-label="กรองตามลูกค้า"></select>
+        </div>
+        <div class="top-actions">
+          <span id="sync" class="sync" role="status">กำลังเชื่อมต่อ…</span>
+          <button id="search-toggle" class="icon-btn mobile-only" type="button" aria-expanded="false" aria-controls="tools" aria-label="ค้นหาและกรอง"><svg class="ico" aria-hidden="true"><use href="#i-search"/></svg></button>
+          <button id="new-job" class="btn primary" type="button">+ งานใหม่</button>
+        </div>
+      </div>
+    </header>
+
+    <section class="summary wrap" id="summary" aria-label="สรุป"></section>
+
+    <main class="wrap" id="main" tabindex="-1">
+      <section class="view" id="view-mine" hidden aria-labelledby="page-title"></section>
+      <section class="view" id="view-table" aria-labelledby="page-title"></section>
+      <section class="view" id="view-kanban" hidden aria-labelledby="page-title"></section>
+      <section class="view" id="view-orders" hidden aria-labelledby="page-title"></section>
+      <section class="view" id="view-archive" hidden aria-labelledby="page-title"></section>
+      <section class="view" id="view-more" hidden aria-labelledby="page-title"></section>
+    </main>
+  </div>
+</div>
+
+<nav class="bottom-nav" role="tablist" aria-label="เมนูหลัก">
+  <button class="tab" role="tab" data-view="mine" id="bn-mine"><svg class="ico" aria-hidden="true"><use href="#i-mine"/></svg>งานของฉัน</button>
+  <button class="tab" role="tab" data-view="kanban" id="bn-kanban"><svg class="ico" aria-hidden="true"><use href="#i-kanban"/></svg>Kanban</button>
+  <button class="tab" role="tab" data-view="table" id="bn-table"><svg class="ico" aria-hidden="true"><use href="#i-table"/></svg>ตาราง</button>
+  <button class="tab" role="tab" data-view="more" id="bn-more" data-also="orders archive"><svg class="ico" aria-hidden="true"><use href="#i-more"/></svg>เพิ่มเติม</button>
+</nav>
+
+<div class="scrim" id="scrim" hidden></div>
+<aside class="drawer" id="drawer" hidden role="dialog" aria-modal="true" aria-label="รายละเอียด"></aside>
+<div class="toast" id="toast" hidden role="status"></div>
+<div class="pop" id="pop" hidden role="menu"></div>
+<dialog class="dlg" id="dlg"></dialog>
+<div class="login" id="login" hidden>
+  <div class="login-wrap">
+    <div class="brand"><img src="/icon.svg" alt=""><div><b>บอร์ดงาน Jig</b><small>Jig / Fixture</small></div></div>
+    <form class="login-card" id="login-form" autocomplete="on" novalidate>
+      <h2>เข้าสู่ระบบ</h2>
+      <label>ชื่อผู้ใช้<input class="field mono" id="lg-user" name="username" autocomplete="username" autocapitalize="none" spellcheck="false" required aria-describedby="lg-msg"></label>
+      <label for="lg-pass">รหัสผ่าน</label>
+      <div class="pw-wrap" id="lg-pass-wrap" style="margin-top:-10px">
+        <input class="field" id="lg-pass" name="password" type="password" autocomplete="current-password" required aria-describedby="lg-msg">
+        <button class="icon-btn" type="button" id="lg-eye" aria-label="แสดงรหัสผ่าน" aria-pressed="false" aria-controls="lg-pass"><svg class="ico" aria-hidden="true"><use href="#i-eye"/></svg></button>
+      </div>
+      <div class="login-msg" id="lg-msg" role="alert"></div>
+      <button class="btn primary" type="submit" id="lg-btn">เข้าสู่ระบบ</button>
+      <p class="muted small" style="margin:0">ลืมรหัสผ่าน แจ้งผู้ดูแลระบบให้รีเซ็ตให้</p>
+    </form>
+    <div class="conn-line" id="lg-conn">เชื่อมต่อเซิร์ฟเวอร์โรงงานได้</div>
+  </div>
+</div>
+
+<script>
+
+// ขั้นงานระดับชุด: ช่วง "เตรียมชิ้นส่วน" แต่ละชิ้นแยกเส้นทาง หลังจากนั้นเดินเป็นชุดเดียว
+const STAGES = [
+  { id: "drawing",  label: "รับแบบ",          h: 200 },
+  { id: "quote",    label: "เสนอราคา",        h: 215 },
+  { id: "waitpo",   label: "รอ PO",           h: 230 },
+  { id: "prep",     label: "เตรียมชิ้นส่วน",    h: 28, sub: "แต่ละชิ้นเดินตามเส้นทางของตัวเอง" },
+  { id: "assembly", label: "ประกอบ",          h: 45 },
+  { id: "inspect",  label: "ตรวจสอบ",         h: 185, sub: "CMM / Gauge" },
+  { id: "tryout",   label: "Try-out",         h: 160 },
+  { id: "ready",    label: "รอส่ง",           h: 140, sub: "ทำเสร็จแล้ว รอส่งมอบ" },
+  { id: "done",     label: "ส่งแล้ว",          h: 150, sub: "แสดง 7 วันล่าสุด ที่เหลืออยู่ในคลังงาน" },
+];
+const SIDX = Object.fromEntries(STAGES.map((s, i) => [s.id, i]));
+// ขั้นของชิ้นส่วน
+const OPS = {
+  machining: { label: "แปรรูป",         sub: "CNC / กลึง / มิลลิ่ง",          h: 28,  doing: "กำลังแปรรูป",     wait: "รอแปรรูป" },
+  laser:     { label: "ตัด laser",      h: 350, doing: "กำลังตัด laser",  wait: "รอตัด laser" },
+  bend:      { label: "พับ",            h: 300, doing: "กำลังพับ",        wait: "รอพับ" },
+  // ext: ของออกไปนอกโรงงาน ตอนส่งต้องบันทึกร้านและกำหนดรับ (step.shop, step.due) · start = วันส่ง, end = วันรับกลับ
+  outside:   { label: "งานนอก",         sub: "ชุบแข็ง / เจียระไน / ชุบผิว", h: 330, doing: "อยู่งานนอก",      wait: "รอส่งงานนอก",
+               ext: true, send: "ส่งงานนอก", recv: "รับกลับจากงานนอก" },
+  supplier:  { label: "จ้าง Supplier ทำ", h: 262, doing: "อยู่ที่ Supplier", wait: "รอส่ง Supplier",
+               ext: true, send: "ส่ง Supplier", recv: "รับของจาก Supplier" },
+};
+const STEP_STATE = { wait: "รอ", doing: "กำลังทำ", done: "เสร็จ" };
+const PRESETS = [
+  { id: "mach",     label: "แปรรูปในโรงงาน",          route: ["machining"] },
+  { id: "sheet",    label: "งานแผ่น: ตัด laser → พับ", route: ["laser", "bend"] },
+  { id: "machout",  label: "แปรรูป → งานนอก (ชุบหลัง)", route: ["machining", "outside"] },
+  { id: "outmach",  label: "งานนอก (ชุบก่อน) → แปรรูป", route: ["outside", "machining"] },
+  { id: "sheetout", label: "งานแผ่น → งานนอก (ชุบ)",   route: ["laser", "bend", "outside"] },
+  { id: "supplier", label: "จ้าง Supplier ทำทั้งชิ้น", route: ["supplier"] },
+];
+const ISSUES = ["", "รอวัสดุ", "รอลูกค้า", "Rework/แก้ไข", "หยุดชั่วคราว", "รอ Supplier จัดทำ", "รอ TPT process", "รอ Verify", "รอ Packing"];
+const LOST_REASONS = ["ลูกค้าไม่เปิด PO", "ราคาไม่ผ่าน", "ลูกค้ายกเลิกงาน", "ทำไม่ได้ / ปฏิเสธงาน", "อื่น ๆ"];
+const CLOSED_LABEL = { done: "ส่งแล้ว", lost: "ไม่ได้งาน / ยกเลิก" };
+const ORDER_STATUS = ["ยังไม่สั่ง", "สั่งแล้ว-รอรับ", "รับบางส่วน", "รับครบ"];
+const KINDS = { material: "Material", stdpart: "Std part", outsource: "จ้างทำ" };
+const ORDER_SRC = { excel: "Excel", cover: "Cover sheet", csv: "CSV", pdf: "PDF" };
+const CUST_H = { Ethernal: 280, Pioneer: 210, Canon: 12 };
+const FIELD_LABEL = { name: "ชื่อ Jig", due: "กำหนดส่ง", po: "PO / Job", qty: "จำนวน", owner: "ผู้รับผิดชอบ" };
+const VIEWS = ["mine", "table", "kanban", "orders", "archive", "more"];
+const VIEW_TITLE = { mine: "งานของฉัน", table: "ตาราง", kanban: "Kanban", orders: "สั่งซื้อ / จ้างทำ", archive: "คลังงาน", more: "เพิ่มเติม" };
+const VIEW_KEY = "jigboard.view", MINE_OP_KEY = "jigboard.mineOp";
+const MINE_SHOW = 3; // ชิ้นที่แสดงต่อกลุ่มก่อนกด "แสดงทั้งหมด"
+const BACKUP_KEY = "jigboard.lastBackup";
+const RECENT_DONE_DAYS = 7;
+const TH_MON = ["ม.ค.", "ก.พ.", "มี.ค.", "เม.ย.", "พ.ค.", "มิ.ย.", "ก.ค.", "ส.ค.", "ก.ย.", "ต.ค.", "พ.ย.", "ธ.ค."];
+
+const clone = (o) => JSON.parse(JSON.stringify(o));
+let S = { jigs: [], orders: [], logs: [] };
+const ui = {
+  view: "table", kb: "set", arch: "all", cust: "", q: "", open: new Set(), drawer: null, hideEmpty: false, prefJig: "", restore: null,
+  conn: "connecting", readOnly: false, canWrite: null, canAdmin: false, stale: false,
+  link: false, me: null, isAdmin: false, users: [], newPw: null,
+  mineOp: "all", mineOpen: new Set(), uEdit: null, toolsOpen: false,
+};
+
+/* ---------- ข้อมูลส่วนกลาง (db ของ artifact) ----------
+   jigs/{id}               ชุดงาน (ไม่รวมชิ้นส่วน)
+   parts/{id}              ชิ้นส่วน + เส้นทาง (jigId, pos)
+   orders/{id}             รายการสั่งซื้อ / จ้างทำ
+   logs/{jigId}~{คนเขียน}   ประวัติของชุด แยกเอกสารตามคนเขียน จะได้ไม่เขียนทับกัน
+   หน้าแก้ S ในหน่วยความจำ แล้ว commit() เทียบกับข้อมูลส่วนกลางและเขียนเฉพาะเอกสารที่เปลี่ยน */
+const COLS = ["jigs", "parts", "orders", "logs"];
+let db = null, writer = "s" + Math.random().toString(36).slice(2, 10);
+const remote = { jigs: new Map(), parts: new Map(), orders: new Map(), logs: new Map() };
+const loadedCols = new Set();
+const outbox = new Map();   // path -> เนื้อเอกสาร หรือ null (ลบ) ที่ยังไม่ได้ส่ง
+const inflight = new Map(); // path -> ที่กำลังส่ง
+let pendingLog = [];
+let flushing = false;
+
+function stable(v) {
+  return JSON.stringify(v, (k, x) => (x && typeof x === "object" && !Array.isArray(x) ? Object.fromEntries(Object.keys(x).sort().map((key) => [key, x[key]])) : x));
+}
+function effective(col) {
+  const m = new Map(remote[col]);
+  for (const src of [inflight, outbox]) for (const [path, body] of src) {
+    const [c, id] = path.split("/");
+    if (c === col) body === null ? m.delete(id) : m.set(id, body);
+  }
+  return m;
+}
+function rebuild() {
+  const parts = [...effective("parts").values()];
+  const jigs = [...effective("jigs").values()].map((d) => ({
+    ...clone(d),
+    parts: parts.filter((p) => p.jigId === d.id).sort((a, b) => (a.pos ?? 0) - (b.pos ?? 0))
+      .map((p) => { const { jigId, pos, ...rest } = clone(p); return rest; }),
+  })).sort((a, b) => (a.seq ?? 0) - (b.seq ?? 0) || a.id.localeCompare(b.id));
+  const logs = [...effective("logs").values()].flatMap((d) => (d.entries || []).map((e) => ({ ...e, jigId: d.jigId })));
+  S = { jigs, orders: [...effective("orders").values()].map(clone), logs: logs.concat(pendingLog) };
+}
+function docsOf(state) {
+  const jigs = new Map(), parts = new Map(), orders = new Map();
+  for (const j of state.jigs) {
+    const { parts: ps, ...body } = j;
+    jigs.set(j.id, body);
+    ps.forEach((p, i) => parts.set(p.id, { ...p, jigId: j.id, pos: i }));
+  }
+  for (const o of state.orders) orders.set(o.id, o);
+  return { jigs, parts, orders };
+}
+function enqueue(path, body) { outbox.delete(path); outbox.set(path, body); }
+function queueLogs() {
+  const byJig = new Map();
+  for (const e of pendingLog) {
+    if (!byJig.has(e.jigId)) byJig.set(e.jigId, []);
+    byJig.get(e.jigId).push({ at: e.at, text: e.text, src: e.src, by: e.by || "" });
+  }
+  pendingLog = [];
+  const logs = effective("logs");
+  for (const [jigId, entries] of byJig) {
+    const id = `${jigId}~${writer}`;
+    enqueue(`logs/${id}`, { jigId, writer, entries: [...(logs.get(id)?.entries || []), ...entries] });
+  }
+}
+async function writeDoc(path, body) {
+  const ref = db.doc(path);
+  const run = () => (body === null ? ref.delete() : ref.set(body));
+  try { await run(); }
+  catch (e) {
+    if (e?.code !== "unavailable") throw e;
+    await new Promise((r) => setTimeout(r, 800 + Math.random() * 1200));
+    await run();
+  }
+}
+async function flush() {
+  if (flushing || !db) return;
+  flushing = true; syncStatus();
+  while (outbox.size) {
+    const [path, body] = outbox.entries().next().value;
+    outbox.delete(path); inflight.set(path, body);
+    try { await writeDoc(path, body); }
+    catch (e) { inflight.delete(path); onWriteError(e); break; }
+    inflight.delete(path);
+  }
+  flushing = false; syncStatus();
+}
+function onWriteError(e) {
+  outbox.clear();
+  const code = e?.code;
+  if (code === "not_signed_in") { showLogin("หมดเวลาการเข้าระบบ เข้าระบบอีกครั้ง"); return; }
+  if (code === "invalid_argument" && ui.readOnly) toast("บัญชีนี้มีสิทธิ์ดูอย่างเดียว การแก้ไขไม่ถูกบันทึก");
+  else if (code === "invalid_argument") toast(e.message || "บันทึกไม่ได้ ข้อมูลไม่ถูกต้อง");
+  else toast("บันทึกไม่สำเร็จ เชื่อมต่อเซิร์ฟเวอร์ไม่ได้ ข้อมูลกลับไปเป็นค่าล่าสุดบนเซิร์ฟเวอร์");
+  rebuild(); render(true);
+}
+function syncStatus() {
+  const el = $("sync"); if (!el) return;
+  const busy = outbox.size + inflight.size;
+  const [cls, text] =
+    ui.conn === "connecting" ? ["", "กำลังเชื่อมต่อเซิร์ฟเวอร์…"]
+    : ui.conn === "offline" ? ["bad", "เชื่อมต่อเซิร์ฟเวอร์ไม่ได้"]
+    : ui.conn === "error" ? ["bad", "การเชื่อมต่อขาด โหลดหน้าใหม่"]
+    : !ui.link ? ["bad", "สัญญาณหลุด กำลังต่อใหม่…"]
+    : busy ? ["warn", "กำลังบันทึก…"]
+    : ui.readOnly ? ["", "ดูอย่างเดียว"]
+    : ["ok", "บันทึกบนเซิร์ฟเวอร์แล้ว"];
+  el.className = "sync " + cls; el.textContent = text;
+}
+function applyReadOnly() { document.body.classList.toggle("ro", ui.readOnly); }
+
+/* ---------- เซิร์ฟเวอร์โรงงาน ----------
+   หน้าเว็บคุยกับ server.mjs ผ่าน /api: อ่านทั้งหมดทาง SSE (/api/stream) แล้วรับการเปลี่ยนแปลงสด ๆ
+   เขียนทีละเอกสารด้วย PUT/DELETE /api/docs/<คอลเลกชัน>/<id> */
+async function apiFetch(url, opts = {}) {
+  let r;
+  try { r = await fetch(url, { credentials: "same-origin", ...opts, headers: { "content-type": "application/json", ...(opts.headers || {}) } }); }
+  catch (e) { throw { code: "unavailable", message: "เชื่อมต่อเซิร์ฟเวอร์ไม่ได้" }; }
+  const data = await r.json().catch(() => ({}));
+  if (!r.ok) throw { code: r.status === 401 ? "not_signed_in" : r.status >= 500 ? "unavailable" : data.code || "invalid_argument", message: data.message || "" };
+  return data;
+}
+function makeServerDb() {
+  const maps = { jigs: new Map(), parts: new Map(), orders: new Map(), logs: new Map() };
+  const subs = { jigs: new Set(), parts: new Set(), orders: new Set(), logs: new Set() };
+  let ready = false;
+  const emit = (col) => {
+    const docs = [...maps[col]].map(([id, body]) => ({ id, exists: true, data: () => body, metadata: {} }));
+    for (const fn of subs[col]) fn({ docs, size: docs.length, empty: !docs.length, metadata: {} });
+  };
+  const es = new EventSource("/api/stream");
+  es.addEventListener("snapshot", (e) => {
+    const d = JSON.parse(e.data);
+    for (const col of Object.keys(maps)) maps[col] = new Map(Object.entries(d[col] || {}));
+    ready = true; ui.link = true;
+    for (const col of Object.keys(maps)) emit(col);
+  });
+  es.addEventListener("change", (e) => {
+    const { col, id, body } = JSON.parse(e.data);
+    if (!maps[col]) return;
+    body === null ? maps[col].delete(id) : maps[col].set(id, body);
+    emit(col);
+  });
+  // EventSource ต่อใหม่เองทุก 3 วินาที พอต่อได้เซิร์ฟเวอร์ส่ง snapshot ใหม่ทั้งชุด
+  es.onerror = async () => {
+    ui.link = false; syncStatus();
+    if (es.readyState === EventSource.CLOSED) {
+      try { await apiFetch("/api/me"); location.reload(); } catch (err) { if (err.code === "not_signed_in") showLogin("หมดเวลาการเข้าระบบ เข้าระบบอีกครั้ง"); }
+    }
+  };
+  const url = (path) => "/api/docs/" + path.split("/").map(encodeURIComponent).join("/");
+  return {
+    collection(col) {
+      return { onSnapshot(next) { subs[col].add(next); if (ready) emit(col); return () => subs[col].delete(next); } };
+    },
+    doc(path) {
+      const [col, id] = path.split("/");
+      return {
+        async set(body) { await apiFetch(url(path), { method: "PUT", body: JSON.stringify(body) }); maps[col].set(id, body); emit(col); },
+        async delete() { await apiFetch(url(path), { method: "DELETE" }); maps[col].delete(id); emit(col); },
+      };
+    },
+  };
+}
+async function connect() {
+  let me;
+  try { me = await apiFetch("/api/me"); }
+  catch (e) {
+    if (e.code === "not_signed_in") { showLogin(); return; }
+    ui.conn = "offline"; render(true); return;
+  }
+  ui.me = me; writer = me.username;
+  ui.canWrite = me.canWrite; ui.readOnly = !me.canWrite; ui.canAdmin = me.canEdit; ui.isAdmin = me.isAdmin;
+  applyReadOnly(); renderUserChip();
+  db = makeServerDb();
+  for (const col of COLS) {
+    db.collection(col).onSnapshot((snap) => {
+      const m = new Map();
+      for (const d of snap.docs) m.set(d.id, d.data());
+      remote[col] = m; loadedCols.add(col);
+      if (loadedCols.size === COLS.length) { ui.conn = "live"; rebuild(); render(false); }
+    }, () => { ui.conn = "error"; render(false); });
+  }
+}
+
+const $ = (id) => document.getElementById(id);
+const esc = (v) => String(v ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const pad = (n) => String(n).padStart(2, "0");
+const stage = (id) => STAGES[SIDX[id]];
+const jigById = (id) => S.jigs.find((j) => j.id === id);
+const partOf = (j, pid) => j.parts.find((p) => p.id === pid);
+const custHue = (c) => CUST_H[c] ?? [...c].reduce((a, ch) => (a * 31 + ch.charCodeAt(0)) % 360, 7);
+const nowIso = () => new Date().toISOString();
+
+function today0() { const d = new Date(); d.setHours(0, 0, 0, 0); return d; }
+function isoToday() { const d = new Date(); return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`; }
+function parseD(s) { if (s.length > 10) { const d = new Date(s); d.setHours(0, 0, 0, 0); return d; } const [y, m, d] = s.split("-").map(Number); return new Date(y, m - 1, d); }
+function daysLeft(s) { return Math.round((parseD(s) - today0()) / 864e5); }
+const daysSince = (s) => -daysLeft(s);
+function fmtD(s) { if (!s) return "—"; const d = parseD(s); return `${d.getDate()} ${TH_MON[d.getMonth()]}`; }
+function fmtDT(s) {
+  if (s.length <= 10) return fmtD(s);
+  const d = new Date(s);
+  return `${d.getDate()} ${TH_MON[d.getMonth()]} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+}
+function monthLabel(s) { const d = parseD(s); return `${TH_MON[d.getMonth()]} ${d.getFullYear() + 543}`; }
+
+/* ---------- derived state ---------- */
+const isPending = (o) => o.status !== "รับครบ";
+const isLate = (o) => isPending(o) && o.due && daysLeft(o.due) < 0;
+const ordersOf = (jid) => S.orders.filter((o) => o.jigId === jid);
+const stdOrders = (jid) => S.orders.filter((o) => o.jigId === jid && o.kind === "stdpart");
+const curStep = (p) => p.steps.find((s) => s.state !== "done") || null;
+const partReady = (p) => !curStep(p);
+// งานนอก: ส่งไปแล้วเลยกำหนดรับหรือยัง
+const extLate = (s) => !!(s && s.state === "doing" && OPS[s.op].ext && s.due && daysLeft(s.due) < 0);
+const extInfo = (s) => [s.shop, s.due ? `รับ ${fmtD(s.due)}` : ""].filter(Boolean).join(" · ");
+const lateBadge = (s) => `<span class="badge bad">เลยกำหนดรับ ${-daysLeft(s.due)} วัน</span>`;
+const lateExtParts = (j) => j.parts.filter((p) => extLate(curStep(p)));
+function isoPlus(days) { const d = today0(); d.setDate(d.getDate() + days); return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`; }
+const pastPrep = (j) => SIDX[j.stage] > SIDX.prep;
+const activeIds = () => new Set(S.jigs.filter((j) => !j.closed).map((j) => j.id));
+const recentDone = (j) => j.closed?.kind === "done" && j.closed.at && daysSince(j.closed.at) <= RECENT_DONE_DAYS;
+function readiness(j) {
+  const std = stdOrders(j.id);
+  const total = j.parts.length + std.length;
+  const ready = j.parts.filter(partReady).length + std.filter((o) => !isPending(o)).length;
+  const counts = new Map();
+  for (const p of j.parts) {
+    const s = curStep(p); if (!s) continue;
+    const k = s.state === "doing" ? OPS[s.op].doing : OPS[s.op].wait;
+    counts.set(k, (counts.get(k) || 0) + 1);
+  }
+  const pendStd = std.filter(isPending).length;
+  if (pendStd) counts.set("รอ Std part", pendStd);
+  return { ready, total, blockers: [...counts].map(([k, n]) => `${k} ${n}`) };
+}
+const setReady = (j) => { const r = readiness(j); return r.total > 0 && r.ready === r.total; };
+
+function dueBadge(j) {
+  if (j.closed) return `<span class="res ${j.closed.kind}">${CLOSED_LABEL[j.closed.kind]}${j.closed.at ? " " + fmtD(j.closed.at) : ""}</span>`;
+  if (!j.due) return `<span class="badge">ไม่มีกำหนด</span>`;
+  const n = daysLeft(j.due);
+  if (n < 0) return `<span class="badge bad">เลย ${-n} วัน</span>`;
+  if (n === 0) return `<span class="badge bad">ส่งวันนี้</span>`;
+  if (n <= 3) return `<span class="badge warn">อีก ${n} วัน</span>`;
+  return `<span class="badge">อีก ${n} วัน</span>`;
+}
+function kit(jid) {
+  const os = ordersOf(jid);
+  if (!os.length) return `<span class="muted small">ยังไม่มีรายการ</span>`;
+  const got = os.filter((o) => !isPending(o)).length;
+  const cls = os.some(isLate) ? "late" : got < os.length ? "pending" : "";
+  return `<span class="kit ${cls}"><span class="kit-bar"><i style="width:${(got / os.length) * 100}%"></i></span><span class="mono small">${got}/${os.length}</span>${os.some(isLate) ? '<span class="badge bad">ล่าช้า</span>' : got < os.length ? '<span class="muted small">รอรับ</span>' : ""}</span>`;
+}
+function readyHtml(j) {
+  if (pastPrep(j)) {
+    const left = j.parts.filter((p) => !partReady(p)).length;
+    if (left) return `<span class="badge warn" title="ชุดเลื่อนพ้นเตรียมชิ้นส่วนแล้ว แต่ชิ้นยังไม่เสร็จ">ชิ้นส่วนค้าง ${left}</span>`;
+    return `<span class="muted small">รวมเป็นชุดแล้ว${j.parts.length > 1 ? ` (${j.parts.length} ชิ้น)` : ""}</span>`;
+  }
+  const r = readiness(j);
+  if (!r.total) return `<span class="muted small">ยังไม่ได้ใส่ชิ้นส่วน</span>`;
+  const done = r.ready === r.total;
+  const lateN = lateExtParts(j).length;
+  return `<div class="ready"><span class="kit ${done ? "" : "pending"}"><span class="kit-bar"><i style="width:${(r.ready / r.total) * 100}%"></i></span><span class="mono small">${r.ready}/${r.total}</span>${done ? '<span class="badge ok">✓ พร้อมประกอบ</span>' : '<span class="muted small">พร้อม</span>'}</span>${done ? "" : `<span class="blk">${esc(r.blockers.join(" · "))}</span>`}${lateN ? `<span class="badge bad">งานนอกเลยกำหนดรับ ${lateN}</span>` : ""}</div>`;
+}
+function ageBadge(j) {
+  if (!j.stageAt || !["quote", "waitpo"].includes(j.stage)) return "";
+  const n = daysSince(j.stageAt);
+  return `<span class="badge${n >= 14 ? " warn" : ""}">${stage(j.stage).label} ${n} วัน</span>`;
+}
+function stageSelect(value, attrs) {
+  const s = stage(value);
+  if (ui.readOnly) return `<span class="pill" style="--h:${s.h}">${esc(s.label)}</span>`;
+  return `<select class="pill" style="--h:${s.h}" ${attrs} aria-label="ขั้นงาน">${STAGES.map((x) => `<option value="${x.id}"${x.id === value ? " selected" : ""}>${esc(x.label)}</option>`).join("")}</select>`;
+}
+function issueSelect(value, attrs) {
+  if (ui.readOnly) return value ? `<span class="badge bad">${esc(value)}</span>` : `<span class="muted">ปกติ</span>`;
+  return `<select class="issue-sel${value ? " on" : ""}" ${attrs} aria-label="ปัญหา/รอ">${ISSUES.map((x) => `<option value="${esc(x)}"${x === value ? " selected" : ""}>${x ? esc(x) : "ปกติ"}</option>`).join("")}</select>`;
+}
+function routeChips(j, p, editable) {
+  const chips = p.steps.map((s, i) => {
+    const o = OPS[s.op];
+    const t = s.state === "done" ? (s.end ? fmtD(s.end) : "") : s.state === "doing" ? (o.ext && extInfo(s) ? extInfo(s) : s.start ? `ตั้งแต่ ${fmtD(s.start)}` : "") : "";
+    const mark = s.state === "done" ? "✓ " : s.state === "doing" ? "● " : "○ ";
+    const auto = s.state === "done" && s.auto ? `<span class="auto" title="ปิดอัตโนมัติตอนเลื่อนชุดผ่านเตรียมชิ้นส่วน">อัตโนมัติ</span>` : "";
+    const shop = s.state === "done" && o.ext && s.shop ? `<span class="muted small"> · ${esc(s.shop)}</span>` : "";
+    const late = extLate(s) ? ` ${lateBadge(s)}` : "";
+    const x = editable && s.state === "wait" && p.steps.length > 1
+      ? `<button class="x" data-act="rmstep" data-id="${j.id}" data-pid="${p.id}" data-i="${i}" aria-label="เอาขั้น ${esc(o.label)} ออก">×</button>` : "";
+    // ขั้นที่ยังไม่เริ่มสลับลำดับกับขั้นก่อนหน้าได้ เช่น ย้ายงานนอก (ชุบ) ไปก่อนแปรรูป
+    const mv = editable && s.state === "wait" && i > 0 && p.steps[i - 1].state === "wait"
+      ? `<button class="x" data-act="mvstep" data-id="${j.id}" data-pid="${p.id}" data-i="${i}" aria-label="ย้าย ${esc(o.label)} ไปก่อน ${esc(OPS[p.steps[i - 1].op].label)}" title="ย้ายไปก่อนหน้า">‹</button>` : "";
+    const ed = editable && s.state === "doing" && o.ext
+      ? `<button class="x" data-act="extedit" data-id="${j.id}" data-pid="${p.id}" data-i="${i}" aria-label="แก้ร้านและกำหนดรับของ ${esc(p.name)}" title="แก้ร้าน / กำหนดรับ">✎</button>` : "";
+    return `<span class="step ${s.state}" style="--h:${o.h}">${mv}${mark}${esc(o.label)}${t ? `<time>${esc(t)}</time>` : ""}${shop}${auto}${ed}${x}</span>${late}`;
+  });
+  if (partReady(p)) chips.push(`<span class="step done">✓ พร้อมประกอบ</span>`);
+  const add = editable ? `<select class="add-step" data-act="addstep" data-id="${j.id}" data-pid="${p.id}" aria-label="เพิ่มขั้นให้ชิ้นส่วนนี้"><option value="">+ ขั้น</option>${Object.entries(OPS).map(([k, o]) => `<option value="${k}">${esc(o.label)}</option>`).join("")}</select>` : "";
+  return `<div class="route-chips">${chips.join('<span class="arrow">→</span>')}${add}</div>`;
+}
+function partActions(j, p, mode = "drawer") {
+  const s = curStep(p), o = s && OPS[s.op];
+  const label = s ? (s.state === "wait" ? (o.ext ? `${o.send}…` : `เริ่ม${o.label}`) : (o.ext ? o.recv : `${o.label} เสร็จ`)) : "";
+  const main = s ? `<button class="btn ${s.state === "doing" ? "primary" : "outline"} ${mode === "row" ? "" : "big"}" data-act="padv" data-id="${j.id}" data-pid="${p.id}">${esc(label)}</button>` : "";
+  if (mode === "mine") return main;
+  const back = p.steps.some((x) => x.state !== "wait")
+    ? `<button class="btn link" data-act="pback" data-id="${j.id}" data-pid="${p.id}">ย้อนกลับ 1 ขั้น</button>` : "";
+  if (mode === "row") return `<div class="part-actions">${main}${back}</div>`;
+  return `<div class="part-actions stack">${main}${back ? `<div class="back-row">${back}</div>` : ""}</div>`;
+}
+// สถานะชิ้นส่วนเป็นข้อความพร้อมไอคอน (ไม่ใช้สีอย่างเดียว)
+function partStateHtml(p) {
+  const s = curStep(p);
+  if (!s) return `<span class="st done"><span class="i">✓</span>พร้อมประกอบ</span>`;
+  const o = OPS[s.op];
+  if (s.state === "doing" && o.ext && extInfo(s))
+    return `<span class="st doing"><span class="i">●</span>${esc(o.doing)} <span class="muted small">${esc(extInfo(s))}</span></span>${extLate(s) ? ` ${lateBadge(s)}` : ""}`;
+  return s.state === "doing"
+    ? `<span class="st doing"><span class="i">●</span>${esc(o.doing)}${s.start ? ` <span class="muted small">ตั้งแต่ ${fmtD(s.start)}</span>` : ""}</span>`
+    : `<span class="st wait"><span class="i">○</span>${esc(o.wait)}</span>`;
+}
+
+/* ---------- mutations: every change writes its own timestamp ---------- */
+function log(jigId, text) {
+  const at = nowIso(), entry = { jigId, at, text, src: "app", by: ui.me?.name || "" };
+  S.logs.push(entry); pendingLog.push(entry);
+  const j = jigById(jigId); if (j) j.updated = at;
+}
+function readyMsg(j) {
+  return !pastPrep(j) && setReady(j) ? `${j.jigNo} ชิ้นส่วนครบ ${readiness(j).total} รายการ พร้อมประกอบ` : "";
+}
+function setJigStage(j, to, how) {
+  const from = j.stage; if (from === to && (!j.closed || to === "done")) return "";
+  if (j.closed?.kind === "lost") j.closed = null;
+  j.stage = to; j.stageAt = nowIso();
+  log(j.id, `${how === "drag" ? "ลากการ์ด" : "เปลี่ยนขั้นงาน"}: ${stage(from).label} → ${stage(to).label}`);
+  if (to === "done") { j.closed = { kind: "done", at: nowIso() }; log(j.id, "ส่งมอบแล้ว · ปิดงาน ย้ายเข้าคลังงาน"); return " · ย้ายเข้าคลังงานแล้ว"; }
+  if (from === "done") { j.closed = null; log(j.id, "เปิดงานกลับจากคลังงาน"); }
+  const r = readiness(j);
+  if (SIDX[from] <= SIDX.prep && pastPrep(j) && r.total && r.ready < r.total) return ` · ชิ้นส่วนพร้อมแค่ ${r.ready}/${r.total}`;
+  return "";
+}
+function closeLost(j, reason) {
+  j.closed = { kind: "lost", at: nowIso(), reason, from: j.stage };
+  log(j.id, `ปิดงาน: ${reason} (ที่ขั้น ${stage(j.stage).label}) · ย้ายเข้าคลังงาน`);
+}
+function reopen(j) {
+  if (!j.closed) return;
+  const was = j.closed.kind;
+  j.closed = null;
+  if (was === "done") { j.stage = "ready"; j.stageAt = nowIso(); }
+  log(j.id, `เปิดงานกลับจากคลังงาน · ขั้น ${stage(j.stage).label}`);
+}
+function partAdvance(j, p) {
+  const s = curStep(p); if (!s) return "";
+  if (s.state === "wait") { s.state = "doing"; s.start = nowIso(); log(j.id, `${p.name}: เริ่ม${OPS[s.op].label}`); return `${p.name}: เริ่ม${OPS[s.op].label}`; }
+  s.state = "done"; s.end = nowIso();
+  log(j.id, `${p.name}: ${OPS[s.op].label} เสร็จ`);
+  return readyMsg(j) || `${p.name}: ${OPS[s.op].label} เสร็จ`;
+}
+function partBack(j, p) {
+  const s = curStep(p);
+  if (s && s.state === "doing") { s.state = "wait"; s.start = null; log(j.id, `${p.name}: ย้อน · ยังไม่เริ่ม${OPS[s.op].label}`); return; }
+  const last = [...p.steps].reverse().find((x) => x.state === "done");
+  if (!last) return;
+  last.state = "doing"; last.end = null;
+  log(j.id, `${p.name}: ย้อน · ${OPS[last.op].label} ยังไม่เสร็จ`);
+}
+function setIssue(j, v) {
+  if (j.issue === v) return;
+  log(j.id, v ? `ตั้งสถานะ: ${v}` : `ปลดสถานะ “${j.issue}” กลับเป็นปกติ`);
+  j.issue = v;
+}
+function setOrderStatus(o, v) {
+  if (o.status === v) return "";
+  o.status = v;
+  if (v === "สั่งแล้ว-รอรับ" && !o.ordered) o.ordered = isoToday();
+  if (v === "รับครบ" && !o.received) o.received = isoToday();
+  if (v !== "รับครบ") o.received = null;
+  log(o.jigId, `${KINDS[o.kind]} ${o.what}${o.supplier ? ` (${o.supplier})` : ""}: ${v}`);
+  return o.kind === "stdpart" ? readyMsg(jigById(o.jigId)) : "";
+}
+function commit(msg, action) {
+  if (ui.conn !== "live" || ui.readOnly) {
+    pendingLog = []; rebuild(); render(true);
+    toast(ui.readOnly ? "บัญชีนี้มีสิทธิ์ดูอย่างเดียว การแก้ไขไม่ถูกบันทึก" : "ยังไม่ได้เชื่อมต่อข้อมูลส่วนกลาง แก้ไขไม่ได้ตอนนี้");
+    return;
+  }
+  const next = docsOf(S);
+  for (const col of ["jigs", "parts", "orders"]) {
+    const cur = effective(col);
+    for (const [id, body] of next[col]) if (!cur.has(id) || stable(cur.get(id)) !== stable(body)) enqueue(`${col}/${id}`, clone(body));
+    for (const id of cur.keys()) if (!next[col].has(id)) enqueue(`${col}/${id}`, null);
+  }
+  queueLogs();
+  rebuild(); render(true); flush();
+  if (msg) toast(msg, action);
+}
+
+/* ---------- filters ---------- */
+function visibleJigs(withClosed) {
+  const q = ui.q.trim().toLowerCase();
+  return S.jigs.filter((j) => {
+    if (!withClosed && j.closed) return false;
+    if (ui.cust && j.customer !== ui.cust) return false;
+    if (!q) return true;
+    const hay = [j.jigNo, j.name, j.po, j.owner, ...j.parts.map((p) => p.name)].join(" ").toLowerCase();
+    return hay.includes(q);
+  });
+}
+const byDue = (a, b) => (a.due || "9").localeCompare(b.due || "9");
+
+/* ---------- summary ---------- */
+function renderSummary() {
+  const js = S.jigs.filter((j) => !j.closed);
+  const late = js.filter((j) => j.due && daysLeft(j.due) < 0).length;
+  const soon = js.filter((j) => j.due && daysLeft(j.due) >= 0 && daysLeft(j.due) <= 3).length;
+  const ready = js.filter((j) => !pastPrep(j) && setReady(j)).length;
+  const toShip = js.filter((j) => j.stage === "ready").length;
+  const issues = js.filter((j) => j.issue).length;
+  const act = activeIds();
+  const pend = S.orders.filter((o) => act.has(o.jigId) && isPending(o));
+  const parts = js.reduce((a, j) => a + j.parts.length, 0);
+  const atShop = js.flatMap((j) => j.parts.map(curStep)).filter((s) => s && s.state === "doing" && OPS[s.op].ext);
+  const shopLate = atShop.filter(extLate).length;
+  const counts = STAGES.map((s) => ({ s, n: js.filter((j) => j.stage === s.id).length })).filter((x) => x.n);
+  $("summary").innerHTML = `
+    <div class="stat"><b>${js.length}</b><span>ชุดที่ยังเปิดอยู่ (${parts} ชิ้นส่วน)</span></div>
+    <div class="stat ${late ? "bad" : ""}"><b>${late}</b><span>เลยกำหนดส่ง</span></div>
+    <div class="stat ${soon ? "warn" : ""}"><b>${soon}</b><span>ส่งภายใน 3 วัน</span></div>
+    <div class="stat ${ready ? "ok" : ""}"><b>${ready}</b><span>พร้อมประกอบ</span></div>
+    <div class="stat ${toShip ? "ok" : ""}"><b>${toShip}</b><span>รอส่ง</span></div>
+    <div class="stat ${issues ? "bad" : ""}"><b>${issues}</b><span>ติดปัญหา / รอ</span></div>
+    <div class="stat ${pend.some(isLate) ? "bad" : pend.length ? "warn" : ""}"><b>${pend.length}</b><span>ของค้างรับ${pend.some(isLate) ? ` · ล่าช้า ${pend.filter(isLate).length}` : ""}</span></div>
+    <div class="stat ${shopLate ? "bad" : atShop.length ? "warn" : ""}"><b>${atShop.length}</b><span>ชิ้นอยู่งานนอก${shopLate ? ` · เลยกำหนดรับ ${shopLate}` : ""}</span></div>
+    <div class="flow"><div class="flow-label"><span>ชุดที่เปิดอยู่ อยู่ขั้นไหน</span><span>${js.length} ชุด</span></div>
+      <div class="flow-bar">${counts.map(({ s, n }) => `<div class="flow-seg" style="--h:${s.h};flex:${n}" title="${esc(s.label)}: ${n}">${esc(s.label)} ${n}</div>`).join("")}</div></div>`;
+  $("n-table").textContent = js.length;
+  $("n-mine").textContent = mineData().all || "";
+  $("n-orders").textContent = pend.length ? `${pend.length} ค้าง` : "";
+  $("n-archive").textContent = S.jigs.length - js.length || "";
+}
+
+/* ---------- table ---------- */
+function renderTable() {
+  const js = visibleJigs(false);
+  const custs = [...new Set(js.map((j) => j.customer))];
+  const closedN = visibleJigs(true).length - js.length;
+  const foot = closedN ? `<p class="note">งานที่ปิดแล้ว ${closedN} ชุด (ส่งแล้ว / ไม่ได้งาน) อยู่ในแท็บคลังงาน</p>` : "";
+  if (!S.jigs.length) { $("view-table").innerHTML = `<div class="status-msg"><b>ยังไม่มีงานในบอร์ด</b>กด “+ งานใหม่” เพื่อเริ่มงานแรก หรือกู้ข้อมูลจากไฟล์ Excel ในเมนู “สำรองข้อมูล”</div>`; return; }
+  if (!js.length) { $("view-table").innerHTML = `<p class="empty-note" style="margin-top:16px">ไม่มีงานที่เปิดอยู่ตรงกับตัวกรอง</p>${foot}`; return; }
+  $("view-table").innerHTML = custs.map((c) => {
+    const rows = js.filter((j) => j.customer === c).sort(byDue);
+    return `<section class="group">
+      <h2 class="group-h" style="--h:${custHue(c)}"><span class="dot"></span>${esc(c)}<span class="cnt">${rows.length} ชุด</span></h2>
+      <div class="scroll-x"><table class="grid cards" style="min-width:1080px">
+        <thead><tr><th style="width:20%">ชุด / Jig</th><th>PO / Job</th><th>ขั้นงาน</th><th>ชิ้นส่วน</th><th>ปัญหา / รอ</th><th>กำหนดส่ง</th><th>ของที่สั่ง</th><th>ผู้รับผิดชอบ</th><th>อัปเดตล่าสุด</th></tr></thead>
+        <tbody>${rows.map(rowHtml).join("")}</tbody>
+      </table></div></section>`;
+  }).join("") + foot;
+}
+function rowHtml(j) {
+  const open = ui.open.has(j.id);
+  const std = stdOrders(j.id);
+  const canOpen = j.parts.length + std.length > 0;
+  const sub = j.name || (j.parts.length > 1 ? `${j.parts.length} ชิ้นส่วน` : "");
+  // data-label ใช้เป็นหัวข้อเล็กตอนตารางกลายเป็นการ์ดบนมือถือ
+  let h = `<tr>
+    <td class="wide"><div class="jig-cell">
+      <button class="caret${canOpen ? "" : " ph"}" data-act="toggle" data-id="${j.id}" aria-expanded="${open}" aria-label="แสดงชิ้นส่วน" ${canOpen ? "" : 'tabindex="-1"'}>▸</button>
+      <button class="jig-link" data-act="open" data-id="${j.id}"><span class="no">${esc(j.jigNo)}</span>${sub ? `<span class="nm">${esc(sub)}</span>` : ""}</button>
+    </div></td>
+    <td class="mono small" data-label="PO / Job">${esc(j.po || "—")}</td>
+    <td data-label="ขั้นงาน">${stageSelect(j.stage, `data-act="stage" data-id="${j.id}"`)}${ageBadge(j) ? `<div style="margin-top:4px">${ageBadge(j)}</div>` : ""}</td>
+    <td class="wide" data-label="ชิ้นส่วน">${readyHtml(j)}</td>
+    <td data-label="ปัญหา / รอ">${issueSelect(j.issue, `data-act="issue" data-id="${j.id}"`)}</td>
+    <td data-label="กำหนดส่ง"><div class="mono small">${fmtD(j.due)}</div>${dueBadge(j)}</td>
+    <td data-label="ของที่สั่ง">${kit(j.id)}</td>
+    <td class="small" data-label="ผู้รับผิดชอบ">${esc(j.owner || "—")}</td>
+    <td class="mono small muted" data-label="อัปเดตล่าสุด">${j.updated ? fmtDT(j.updated) : "—"}</td>
+  </tr>`;
+  if (open) {
+    h += j.parts.map((p) => `<tr class="sub">
+      <td class="mono small wide">${esc(p.name)}${p.spec ? `<div class="spec">${esc(p.spec)}</div>` : ""}</td>
+      <td colspan="4" class="wide">${routeChips(j, p, false)}</td>
+      <td colspan="4" class="wide">${partActions(j, p, "row")}</td></tr>`).join("");
+    h += std.map((o) => `<tr class="sub">
+      <td class="small wide"><span class="kind stdpart">Std part</span> ${esc(o.what)}</td>
+      <td colspan="4" class="small muted wide">${esc(o.supplier || "—")} · ${esc(o.status)}${o.due ? ` · กำหนดรับ ${fmtD(o.due)}` : ""}</td>
+      <td colspan="4" class="wide">${isPending(o) ? `<button class="btn sm" data-act="receive" data-oid="${o.id}">รับของแล้ว</button>` : '<span class="badge ok">✓ รับครบ</span>'}</td></tr>`).join("");
+  }
+  return h;
+}
+
+/* ---------- kanban ---------- */
+function renderKanban() {
+  const head = `<div class="kb-opts">
+      <div class="seg" role="group" aria-label="มุมมอง Kanban">
+        <button type="button" data-act="kbmode" data-mode="set" aria-pressed="${ui.kb === "set"}">ชุด</button>
+        <button type="button" data-act="kbmode" data-mode="part" aria-pressed="${ui.kb === "part"}">ชิ้นส่วน</button>
+      </div>
+      <label><input type="checkbox" id="kb-hide"${ui.hideEmpty ? " checked" : ""}> ซ่อนช่องที่ว่าง</label>
+      <span>${ui.kb === "set" ? (ui.readOnly ? "ดูอย่างเดียว" : "ลากการ์ดไปช่องอื่น หรือกดปุ่มขั้นถัดไปบนการ์ด · ปิดงานอยู่ในเมนู ⋯") : "ชิ้นส่วนของชุดที่อยู่ขั้นเตรียมชิ้นส่วน แยกตามขั้นที่ชิ้นนั้นอยู่"}</span>
+    </div>`;
+  const js = visibleJigs(true).filter((j) => !j.closed || recentDone(j));
+  $("view-kanban").innerHTML = head + `<div class="board" id="board">${ui.kb === "set" ? setLanes(js) : partLanes(js.filter((j) => !j.closed))}</div>`;
+}
+// ช่องที่ว่างหดเป็นแถบแคบ แต่ยังเป็นที่วางการ์ดได้ (data-stage เดิม)
+function lane(id, pill, sub, count, body, empty) {
+  if (ui.hideEmpty && !count) return "";
+  return `<section class="lane${count ? "" : " empty"}" data-stage="${id}" aria-label="${esc(pill.replace(/<[^>]+>/g, ""))} ${count}">
+    <div class="lane-h"><div>${pill}${sub ? `<small>${esc(sub)}</small>` : ""}</div><span class="c">${count}</span></div>
+    <div class="lane-body">${count ? body : `<div class="drop-hint">${empty}</div>`}</div></section>`;
+}
+function setLanes(js) {
+  return STAGES.map((s) => {
+    const cards = js.filter((j) => j.stage === s.id).sort(s.id === "done" ? (a, b) => (b.closed?.at || "").localeCompare(a.closed?.at || "") : byDue);
+    return lane(s.id, `<span class="pill" style="--h:${s.h}">${esc(s.label)}</span>`, s.sub, cards.length, cards.map(setCard).join(""), "วางการ์ดที่นี่");
+  }).join("");
+}
+function setCard(j) {
+  const pend = ordersOf(j.id).filter(isPending);
+  const next = j.closed ? null : STAGES[SIDX[j.stage] + 1];
+  const showReady = !j.closed && (j.stage === "prep" || (!pastPrep(j) && readiness(j).total) || (pastPrep(j) && j.parts.some((p) => !partReady(p))));
+  const menu = j.closed || ui.readOnly ? "" : `<button class="menu-btn" type="button" data-act="cardmenu" data-id="${j.id}" aria-haspopup="menu" aria-expanded="false" aria-label="เมนูของ ${esc(j.jigNo)}"><svg class="ico" aria-hidden="true"><use href="#i-more"/></svg></button>`;
+  return `<article class="card" draggable="${!ui.readOnly && !j.closed}" data-id="${j.id}">
+    <div class="card-top"><button class="open-btn" data-act="open" data-id="${j.id}"><span class="no">${esc(j.jigNo)}</span></button>${menu}</div>
+    <div class="cust">${esc(j.customer)}${j.name ? " · " + esc(j.name) : ""}${j.parts.length > 1 ? ` · ${j.parts.length} ชิ้นส่วน` : ""}</div>
+    ${showReady ? readyHtml(j) : ""}
+    <div class="card-meta">${dueBadge(j)}${ageBadge(j)}${!j.closed && pend.length ? `<span class="badge ${pend.some(isLate) ? "bad" : "warn"}">รอของ ${pend.length}</span>` : ""}${j.issue && !j.closed ? `<span class="badge bad">${esc(j.issue)}</span>` : ""}</div>
+    <div class="card-foot"><span class="mono small muted">${fmtD(j.due)}</span>${next ? `<button class="next-btn" data-act="next" data-id="${j.id}" title="ย้ายไป ${esc(next.label)}">${esc(next.label)}${next.id === "done" ? "…" : " →"}</button>` : ""}</div>
+  </article>`;
+}
+function partLanes(js) {
+  const items = js.filter((j) => j.stage === "prep").flatMap((j) => j.parts.map((p) => ({ j, p, s: curStep(p) })));
+  const cols = Object.entries(OPS).map(([op, o]) => {
+    const list = items.filter((x) => x.s && x.s.op === op).sort((a, b) => (b.s.state === "doing") - (a.s.state === "doing") || byDue(a.j, b.j));
+    const doing = list.filter((x) => x.s.state === "doing").length;
+    return lane(op, `<span class="pill" style="--h:${o.h}">${esc(o.label)}</span>`, list.length ? `กำลังทำ ${doing} · รอ ${list.length - doing}` : o.sub, list.length, list.map(partCard).join(""), "ไม่มีชิ้นส่วนรอขั้นนี้");
+  });
+  const ready = items.filter((x) => !x.s);
+  cols.push(lane("ready-parts", `<span class="pill" style="--h:150">พร้อมประกอบ</span>`, "รอชิ้นอื่นในชุดให้ครบ", ready.length, ready.map(partCard).join(""), "ยังไม่มี"));
+  return cols.join("");
+}
+function partCard({ j, p, s }) {
+  const idx = s ? p.steps.indexOf(s) : -1;
+  const next = s && p.steps[idx + 1];
+  return `<article class="card pcard">
+    <div class="card-top"><span class="no">${esc(p.name)}</span></div>
+    <button class="open-btn cust" data-act="open" data-id="${j.id}">ชุด ${esc(j.jigNo)} · ${esc(j.customer)}</button>
+    <div class="state">${partStateHtml(p)}${next ? ` · ถัดไป ${esc(OPS[next.op].label)}` : ""}</div>
+    <div class="card-meta">${dueBadge(j)}</div>
+    ${partActions(j, p, "row")}
+  </article>`;
+}
+
+/* ---------- orders ---------- */
+function renderOrders() {
+  const ids = new Set(visibleJigs(false).map((j) => j.id));
+  const os = S.orders.filter((o) => ids.has(o.jigId));
+  const pend = os.filter(isPending).sort(byDue);
+  const done = os.filter((o) => !isPending(o));
+  const jigOpts = S.jigs.filter((j) => !j.closed).map((j) => `<option value="${j.id}"${j.id === ui.prefJig ? " selected" : ""}>${esc(j.jigNo)} · ${esc(j.customer)}</option>`).join("");
+  const suppliers = [...new Set(S.orders.map((o) => o.supplier).filter(Boolean))];
+  const table = (list) => `<div class="scroll-x"><table class="grid cards">
+    <thead><tr><th>ชุด / Jig</th><th>ประเภท</th><th>รายการ</th><th>จำนวน</th><th>Supplier</th><th>สั่งเมื่อ</th><th>กำหนดรับ</th><th>รับจริง</th><th>สถานะ</th><th></th></tr></thead>
+    <tbody>${list.map((o) => {
+      const j = jigById(o.jigId);
+      return `<tr>
+        <td><button class="jig-link" data-act="open" data-id="${j.id}"><span class="no">${esc(j.jigNo)}</span><span class="nm">${esc(j.customer)}</span></button></td>
+        <td><span class="kind ${o.kind}">${KINDS[o.kind]}</span></td>
+        <td class="small wide"><span class="mono">${esc(o.what)}</span>${ORDER_SRC[o.src] ? `<span class="src">${ORDER_SRC[o.src]}</span>` : ""}${o.note ? `<div class="muted small">หมายเหตุ: ${esc(o.note)}</div>` : ""}</td>
+        <td class="mono" data-label="จำนวน">${o.qty ?? "—"}</td>
+        <td class="small" data-label="Supplier">${esc(o.supplier || "—")}</td>
+        <td class="mono small" data-label="สั่งเมื่อ">${fmtD(o.ordered)}</td>
+        <td class="mono small" data-label="กำหนดรับ">${fmtD(o.due)} ${isLate(o) ? `<span class="badge bad">เลย ${-daysLeft(o.due)} วัน</span>` : ""}</td>
+        <td class="mono small" data-label="รับจริง">${fmtD(o.received)}</td>
+        <td data-label="สถานะ">${ui.readOnly ? `<span class="ro-text">${isPending(o) ? "" : "✓ "}${esc(o.status)}</span>` : `<select class="field" data-act="ostatus" data-oid="${o.id}" aria-label="สถานะรายการ">${ORDER_STATUS.map((s) => `<option${s === o.status ? " selected" : ""}>${s}</option>`).join("")}</select>`}</td>
+        <td><div class="part-actions">${!ui.readOnly && isPending(o) ? `<button class="btn sm" data-act="receive" data-oid="${o.id}">รับของแล้ว</button>` : ""}${ui.readOnly ? "" : `<button class="btn sm outline" data-act="oedit" data-oid="${o.id}" aria-label="แก้ไขรายการ ${esc(o.what)}">แก้ไข</button>`}</div></td>
+      </tr>`;
+    }).join("")}</tbody></table></div>`;
+  $("view-orders").innerHTML = `
+    ${ui.readOnly ? "" : `<div class="ord-import">
+      <button class="btn outline" type="button" data-act="csvpick">นำเข้าจาก Misumi (PDF / CSV)…</button>
+      <span class="muted small">ใบยืนยันการสั่งซื้อ (PDF) ได้วันรับให้เลย · หรือไฟล์ CSV ที่อัปโหลดเข้าเว็บ Misumi</span>
+      <input type="file" id="csv-file" accept=".pdf,.csv,.xlsx,.xls,application/pdf,text/csv" hidden>
+    </div>`}
+    <form class="ord-form" id="ord-form">
+      <label>ชุด / Jig<select class="field" id="o-jig" required>${jigOpts}</select></label>
+      <label>ประเภท<select class="field" id="o-kind">
+        <option value="material">Material (SUS, SS ตามไซส์ Drawing)</option>
+        <option value="stdpart">Std part (ของซื้อมาประกอบ)</option>
+        <option value="outsource">จ้างทำ (พับ, ตัด laser, ชุบ ...)</option></select></label>
+      <label class="wide">รายการ / รหัสสินค้า<input class="field" id="o-what" required placeholder="เช่น SUS304 t10 × 120 × 200 / MGLN10-5-5"></label>
+      <label>จำนวน<input class="field mono" id="o-qty" type="number" min="1" step="1" value="1" required></label>
+      <label>Supplier<input class="field" id="o-sup" list="sup-list" placeholder="ชื่อร้าน"><datalist id="sup-list">${suppliers.map((s) => `<option value="${esc(s)}">`).join("")}</datalist></label>
+      <label>กำหนดรับ<input class="field" id="o-due" type="date"></label>
+      <label class="wide">หมายเหตุ (ถ้ามี)<input class="field" id="o-note" placeholder="เช่น สั่งแทนรุ่นเดิม / รอเทียบราคา"></label>
+      <button class="btn primary" type="submit">บันทึกการสั่ง</button>
+    </form>
+    <h2 class="sec-h">ค้างรับ<span class="cnt">${pend.length} รายการ</span></h2>
+    ${pend.length ? table(pend) : `<p class="empty-note">ไม่มีของค้างรับ</p>`}
+    <h2 class="sec-h">รับครบแล้ว<span class="cnt">${done.length} รายการ</span></h2>
+    ${done.length ? table(done) : `<p class="empty-note">ยังไม่มี</p>`}
+    <p class="note">แสดงเฉพาะรายการของงานที่ยังเปิดอยู่ · Std part นับรวมในยอด “ชิ้นส่วนพร้อม” ของชุดด้วย · รายการที่มีป้าย Excel นำเข้าจากช่อง “สั่งวัสดุ/ชิ้นส่วน” ของไฟล์เดิม ซึ่งยังไม่ได้แยก Material กับ Std part</p>`;
+  $("ord-form").addEventListener("submit", (e) => {
+    e.preventDefault();
+    const o = {
+      id: "O" + Date.now().toString(36), jigId: $("o-jig").value, kind: $("o-kind").value,
+      what: $("o-what").value.trim(), qty: Math.max(1, Math.round(Number($("o-qty").value) || 1)), supplier: $("o-sup").value.trim(),
+      ordered: isoToday(), due: $("o-due").value || null, received: null, status: "สั่งแล้ว-รอรับ", src: "app",
+      note: $("o-note").value.trim(),
+    };
+    if (!o.what) return;
+    S.orders.push(o); ui.prefJig = o.jigId;
+    log(o.jigId, `สั่ง ${KINDS[o.kind]}: ${o.what} × ${o.qty}${o.supplier ? ` กับ ${o.supplier}` : ""}${o.due ? ` กำหนดรับ ${fmtD(o.due)}` : ""}`);
+    commit("บันทึกการสั่งแล้ว");
+  });
+}
+
+/* ---------- archive ---------- */
+function renderArchive() {
+  const all = visibleJigs(true).filter((j) => j.closed);
+  const n = (k) => all.filter((j) => j.closed.kind === k).length;
+  const list = all.filter((j) => ui.arch === "all" || j.closed.kind === ui.arch)
+    .sort((a, b) => (b.closed.at || "").localeCompare(a.closed.at || ""));
+  const bar = `<div class="arch-bar">
+      <div class="seg" role="group" aria-label="กรองคลังงาน">
+        <button type="button" data-act="arch" data-k="all" aria-pressed="${ui.arch === "all"}">ทั้งหมด ${all.length}</button>
+        <button type="button" data-act="arch" data-k="done" aria-pressed="${ui.arch === "done"}">ส่งแล้ว ${n("done")}</button>
+        <button type="button" data-act="arch" data-k="lost" aria-pressed="${ui.arch === "lost"}">ไม่ได้งาน / ยกเลิก ${n("lost")}</button>
+      </div>
+      <span>งานที่ปิดแล้วไม่โชว์ในตารางและ Kanban แต่ข้อมูลและประวัติยังอยู่ครบ เปิดกลับได้</span>
+    </div>`;
+  if (!list.length) { $("view-archive").innerHTML = bar + `<p class="empty-note" style="margin-top:12px">ยังไม่มีงานในคลัง งานจะเข้ามาที่นี่เมื่อเลือกขั้น “ส่งแล้ว” หรือกด “ไม่ได้ PO”</p>`; return; }
+  const months = [];
+  for (const j of list) {
+    const m = j.closed.at ? monthLabel(j.closed.at) : "ไม่ทราบวันที่";
+    if (!months.length || months[months.length - 1].m !== m) months.push({ m, rows: [] });
+    months[months.length - 1].rows.push(j);
+  }
+  $("view-archive").innerHTML = bar + months.map(({ m, rows }) => `
+    <h2 class="month-h">${esc(m)}<span class="cnt">${rows.length} ชุด · ส่งแล้ว ${rows.filter((j) => j.closed.kind === "done").length} · ไม่ได้งาน ${rows.filter((j) => j.closed.kind === "lost").length}</span></h2>
+    <div class="scroll-x"><table class="grid cards">
+      <thead><tr><th>ชุด / Jig</th><th>ลูกค้า</th><th>ผล</th><th>ปิดเมื่อ</th><th>รายละเอียด</th><th>PO / Job</th><th>ชิ้นส่วน</th><th></th></tr></thead>
+      <tbody>${rows.map((j) => `<tr>
+        <td class="wide"><button class="jig-link" data-act="open" data-id="${j.id}"><span class="no">${esc(j.jigNo)}</span>${j.name ? `<span class="nm">${esc(j.name)}</span>` : ""}</button></td>
+        <td class="small" data-label="ลูกค้า">${esc(j.customer)}</td>
+        <td data-label="ผล"><span class="res ${j.closed.kind}">${j.closed.kind === "done" ? "✓ " : ""}${CLOSED_LABEL[j.closed.kind]}</span></td>
+        <td class="mono small" data-label="ปิดเมื่อ">${j.closed.at ? fmtDT(j.closed.at) : "—"}</td>
+        <td class="small wide" data-label="รายละเอียด">${j.closed.kind === "lost" ? `${esc(j.closed.reason || "")}${j.closed.from ? ` <span class="muted">· ปิดที่ขั้น ${esc(stage(j.closed.from)?.label || j.closed.from)}</span>` : ""}` : j.due ? `กำหนดส่ง ${fmtD(j.due)}${daysLeft(j.due) < daysLeft(j.closed.at.slice(0, 10)) ? ' <span class="badge bad">ส่งช้า</span>' : ""}` : "—"}</td>
+        <td class="mono small" data-label="PO / Job">${esc(j.po || "—")}</td>
+        <td class="mono small" data-label="ชิ้นส่วน">${j.parts.length}</td>
+        <td class="wide"><button class="btn sm" data-act="reopen" data-id="${j.id}">เปิดงานกลับ</button></td>
+      </tr>`).join("")}</tbody></table></div>`).join("");
+}
+
+/* ---------- backup (ไฟล์ Excel) ---------- */
+// ใช้สำเนาในเซิร์ฟเวอร์ก่อน (public/vendor/) ถ้าไม่มีค่อยโหลดจาก CDN ซึ่งต้องต่ออินเทอร์เน็ต
+let xlsxP;
+function loadScript(src) {
+  return new Promise((res, rej) => {
+    const s = document.createElement("script");
+    s.src = src; s.onload = res; s.onerror = () => { s.remove(); rej(new Error("load")); };
+    document.head.appendChild(s);
+  });
+}
+function loadXLSX() {
+  if (window.XLSX) return Promise.resolve(window.XLSX);
+  return (xlsxP ||= loadScript("/vendor/xlsx.full.min.js")
+    .catch(() => loadScript("https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"))
+    .then(() => window.XLSX)
+    .catch((e) => { xlsxP = null; throw e; }));
+}
+// เบราว์เซอร์ปกติดาวน์โหลดไฟล์ได้เอง
+function getDownloads() {
+  return Promise.resolve({
+    async save({ filename, data }) {
+      const url = URL.createObjectURL(data instanceof Blob ? data : new Blob([data]));
+      const a = Object.assign(document.createElement("a"), { href: url, download: filename });
+      document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 10000);
+      return { status: "saved" };
+    },
+  });
+}
+function toSheets() {
+  const stg = (id) => stage(id)?.label ?? id;
+  return {
+    "ชุดงาน": S.jigs.map((j) => ({
+      "รหัส": j.id, "Jig No": j.jigNo, "ชื่อ": j.name || "", "ลูกค้า": j.customer, "PO / Job": j.po || "",
+      "จำนวน": j.qty ?? "", "ผู้รับผิดชอบ": j.owner || "", "กำหนดส่ง": j.due || "", "ขั้นงาน": stg(j.stage), "ขั้นงาน_code": j.stage,
+      "ปัญหา / รอ": j.issue || "", "หมายเหตุ": j.note || "",
+      "ปิดงาน": j.closed ? CLOSED_LABEL[j.closed.kind] : "", "ปิดงาน_code": j.closed?.kind || "", "ปิดเมื่อ": j.closed?.at || "",
+      "เหตุผลที่ปิด": j.closed?.reason || "", "ปิดที่ขั้น_code": j.closed?.from || "", "เข้าขั้นนี้เมื่อ": j.stageAt || "", "อัปเดตล่าสุด": j.updated || "",
+    })),
+    "ชิ้นส่วน": S.jigs.flatMap((j) => j.parts.flatMap((p) => p.steps.map((s, i) => ({
+      "รหัสชุด": j.id, "Jig No": j.jigNo, "รหัสชิ้น": p.id, "ชิ้นส่วน": p.name, "สเปก": p.spec || "", "ลำดับขั้น": i + 1,
+      "ขั้น": OPS[s.op]?.label ?? s.op, "ขั้น_code": s.op, "สถานะ": STEP_STATE[s.state], "สถานะ_code": s.state, "เริ่ม": s.start || "", "เสร็จ": s.end || "",
+      "ร้าน": s.shop || "", "กำหนดรับ": s.due || "", "ปิดอัตโนมัติ": s.auto ? "ใช่" : "",
+    })))),
+    "สั่งซื้อ": S.orders.map((o) => ({
+      "รหัส": o.id, "รหัสชุด": o.jigId, "Jig No": jigById(o.jigId)?.jigNo || "", "ประเภท": KINDS[o.kind], "ประเภท_code": o.kind,
+      "รายการ": o.what, "จำนวน": o.qty ?? "", "Supplier": o.supplier || "", "สั่งเมื่อ": o.ordered || "", "กำหนดรับ": o.due || "", "รับจริง": o.received || "",
+      "หมายเหตุ": o.note || "",
+      "สถานะ": o.status, "ที่มา": o.src || "",
+    })),
+    "ประวัติ": S.logs.map((l) => ({ "รหัสชุด": l.jigId, "Jig No": jigById(l.jigId)?.jigNo || "", "เวลา": l.at, "รายการ": l.text, "โดย": l.by || "", "ที่มา": l.src || "" })),
+  };
+}
+function fromSheets(X, wb) {
+  const need = ["ชุดงาน", "ชิ้นส่วน", "สั่งซื้อ", "ประวัติ"];
+  if (!need.every((n) => wb.Sheets[n])) throw new Error("ไฟล์นี้ไม่ใช่ไฟล์สำรองของบอร์ดงาน Jig ต้องมีชีต ชุดงาน, ชิ้นส่วน, สั่งซื้อ และประวัติ");
+  const rows = (n) => X.utils.sheet_to_json(wb.Sheets[n], { defval: "", raw: false });
+  const str = (v) => (v === "" || v == null ? null : String(v).trim());
+  const jigs = rows("ชุดงาน").filter((r) => str(r["รหัส"]) && str(r["Jig No"])).map((r) => ({
+    id: str(r["รหัส"]), jigNo: str(r["Jig No"]), name: str(r["ชื่อ"]), customer: str(r["ลูกค้า"]) || "ไม่ระบุลูกค้า", po: str(r["PO / Job"]),
+    qty: str(r["จำนวน"]) ? Number(r["จำนวน"]) || null : null, owner: str(r["ผู้รับผิดชอบ"]), due: str(r["กำหนดส่ง"]),
+    stage: SIDX[str(r["ขั้นงาน_code"])] != null ? str(r["ขั้นงาน_code"]) : "drawing", issue: str(r["ปัญหา / รอ"]) || "", note: str(r["หมายเหตุ"]) || "",
+    closed: ["done", "lost"].includes(str(r["ปิดงาน_code"])) ? { kind: str(r["ปิดงาน_code"]), at: str(r["ปิดเมื่อ"]), reason: str(r["เหตุผลที่ปิด"]), from: str(r["ปิดที่ขั้น_code"]) } : null,
+    stageAt: str(r["เข้าขั้นนี้เมื่อ"]), updated: str(r["อัปเดตล่าสุด"]), parts: [],
+  }));
+  if (!jigs.length) throw new Error("ไม่พบงานในชีต ชุดงาน");
+  const byId = new Map(jigs.map((j) => [j.id, j]));
+  const parts = new Map();
+  for (const r of rows("ชิ้นส่วน")) {
+    const j = byId.get(str(r["รหัสชุด"])), op = str(r["ขั้น_code"]);
+    if (!j || !OPS[op] || !str(r["รหัสชิ้น"])) continue;
+    let p = parts.get(str(r["รหัสชิ้น"]));
+    if (!p) { p = { id: str(r["รหัสชิ้น"]), name: str(r["ชิ้นส่วน"]) || str(r["รหัสชิ้น"]), spec: str(r["สเปก"]) || "", steps: [] }; parts.set(p.id, p); j.parts.push(p); }
+    const st = str(r["สถานะ_code"]);
+    const step = { n: Number(r["ลำดับขั้น"]) || p.steps.length + 1, op, state: STEP_STATE[st] ? st : "wait", start: str(r["เริ่ม"]), end: str(r["เสร็จ"]) };
+    if (str(r["ร้าน"])) step.shop = str(r["ร้าน"]);
+    if (str(r["กำหนดรับ"])) step.due = str(r["กำหนดรับ"]);
+    if (str(r["ปิดอัตโนมัติ"])) step.auto = true;
+    p.steps.push(step);
+  }
+  for (const p of parts.values()) { p.steps.sort((a, b) => a.n - b.n); p.steps.forEach((s) => delete s.n); }
+  const orders = rows("สั่งซื้อ").filter((r) => byId.has(str(r["รหัสชุด"])) && str(r["รายการ"])).map((r) => ({
+    id: str(r["รหัส"]) || "O" + Math.random().toString(36).slice(2, 8), jigId: str(r["รหัสชุด"]), kind: KINDS[str(r["ประเภท_code"])] ? str(r["ประเภท_code"]) : "material",
+    what: str(r["รายการ"]), qty: str(r["จำนวน"]) ? Math.max(1, Math.round(Number(r["จำนวน"])) || 1) : null, note: str(r["หมายเหตุ"]) || "",
+    supplier: str(r["Supplier"]) || "", ordered: str(r["สั่งเมื่อ"]), due: str(r["กำหนดรับ"]), received: str(r["รับจริง"]),
+    status: ORDER_STATUS.includes(str(r["สถานะ"])) ? str(r["สถานะ"]) : "ยังไม่สั่ง", src: str(r["ที่มา"]) || "",
+  }));
+  const logs = rows("ประวัติ").filter((r) => byId.has(str(r["รหัสชุด"])) && str(r["เวลา"])).map((r) => ({
+    jigId: str(r["รหัสชุด"]), at: str(r["เวลา"]), text: str(r["รายการ"]) || "", src: str(r["ที่มา"]) || "", by: str(r["โดย"]) || "",
+  }));
+  return { jigs, orders, logs };
+}
+function lastBackup() { try { return localStorage.getItem(BACKUP_KEY); } catch (e) { return null; } }
+async function doBackup() {
+  const st = $("bk-status");
+  st.className = "bk-status"; st.textContent = "กำลังสร้างไฟล์ ...";
+  try {
+    const [X, dl] = await Promise.all([loadXLSX(), getDownloads()]);
+    if (!dl) { st.className = "bk-status err"; st.textContent = "หน้านี้บันทึกไฟล์ในมุมมองนี้ไม่ได้ ใช้ปุ่ม “คัดลอกตารางชุดงาน” แล้ววางใน Excel แทน"; $("bk-copy").hidden = false; return; }
+    const wb = X.utils.book_new();
+    for (const [name, data] of Object.entries(toSheets())) {
+      const ws = X.utils.json_to_sheet(data.length ? data : [{}]);
+      const keys = data.length ? Object.keys(data[0]) : [];
+      ws["!cols"] = keys.map((k) => ({ wch: Math.min(40, Math.max(k.length + 2, ...data.slice(0, 200).map((r) => String(r[k] ?? "").length + 1))) }));
+      X.utils.book_append_sheet(wb, ws, name);
+    }
+    const buf = X.write(wb, { bookType: "xlsx", type: "array" });
+    const filename = `บอร์ดงาน-Jig-สำรอง-${isoToday()}.xlsx`;
+    await dl.save({ filename, data: new Blob([buf]) });
+    try { localStorage.setItem(BACKUP_KEY, nowIso()); } catch (e) {}
+    st.className = "bk-status ok"; st.textContent = `บันทึกไฟล์ ${filename} แล้ว`;
+    $("bk-last").textContent = fmtDT(nowIso());
+  } catch (err) {
+    st.className = "bk-status err";
+    st.textContent = err?.code === "declined" ? "ยกเลิกการบันทึกไฟล์แล้ว" : err?.message === "load" ? "โหลดตัวสร้างไฟล์ Excel ไม่สำเร็จ ลองใหม่อีกครั้ง" : "บันทึกไฟล์ไม่สำเร็จ ลองใหม่อีกครั้ง";
+  }
+}
+async function copyTable() {
+  const rows = toSheets()["ชุดงาน"];
+  const keys = Object.keys(rows[0] || {});
+  const tsv = [keys.join("\t"), ...rows.map((r) => keys.map((k) => String(r[k] ?? "").replace(/[\t\n]/g, " ")).join("\t"))].join("\n");
+  const st = $("bk-status");
+  const res = await copyText(tsv);
+  if (res === "ok") { st.className = "bk-status ok"; st.textContent = "คัดลอกแล้ว เปิด Excel แล้วกดวาง (Ctrl+V)"; }
+  else { st.className = "bk-status err"; st.textContent = "คัดลอกอัตโนมัติไม่ได้ในเบราว์เซอร์นี้ ใช้ปุ่มดาวน์โหลดไฟล์ Excel แทน"; }
+}
+async function readRestore(file) {
+  const st = $("rs-status");
+  ui.restore = null; $("rs-apply").hidden = true;
+  if (!file) return;
+  st.className = "bk-status"; st.textContent = "กำลังอ่านไฟล์ ...";
+  try {
+    const X = await loadXLSX();
+    const wb = X.read(await file.arrayBuffer(), { type: "array" });
+    const data = fromSheets(X, wb);
+    ui.restore = data;
+    const parts = data.jigs.reduce((a, j) => a + j.parts.length, 0);
+    st.className = "bk-status ok";
+    st.textContent = `พบ ${data.jigs.length} ชุด (${parts} ชิ้นส่วน) · ${data.orders.length} รายการสั่ง · ประวัติ ${data.logs.length} รายการ`;
+    $("rs-apply").hidden = false;
+  } catch (err) {
+    st.className = "bk-status err";
+    st.textContent = err?.message === "load" ? "โหลดตัวอ่านไฟล์ Excel ไม่สำเร็จ ลองใหม่อีกครั้ง" : err?.message || "อ่านไฟล์ไม่ได้";
+  }
+}
+function renderBackup() {
+  const last = lastBackup();
+  $("drawer").innerHTML = `
+    <div class="dr-head">
+      <div style="flex:1;min-width:0"><h2 class="plain" id="dr-title" tabindex="-1">สำรองข้อมูล</h2><p>สำเนาข้อมูลส่วนกลางเป็นตารางใน Excel</p></div>
+      <button class="icon-btn boxed" type="button" data-act="close" aria-label="ปิดแผง">✕</button>
+    </div>
+    <div class="dr-body">
+      <p class="small" style="margin:0">ข้อมูลเก็บอยู่บนเซิร์ฟเวอร์ของโรงงาน และเซิร์ฟเวอร์สำรองฐานข้อมูลเองทุก 6 ชั่วโมง ไฟล์ Excel เป็นสำเนาอีกชั้นที่เปิดอ่านได้ เช่น เก็บไว้ทุกสิ้นเดือน หรือก่อนแก้ข้อมูลครั้งใหญ่</p>
+      <div class="bk-box">
+        <h3 class="small" style="margin:0">ดาวน์โหลดไฟล์สำรอง (.xlsx)</h3>
+        <ul>
+          <li><b>ชุดงาน</b> 1 แถวต่อ 1 ชุด รวมงานที่ปิดแล้ว</li>
+          <li><b>ชิ้นส่วน</b> 1 แถวต่อ 1 ขั้นของแต่ละชิ้น พร้อมวันที่เริ่มและเสร็จ</li>
+          <li><b>สั่งซื้อ</b> และ <b>ประวัติ</b> ทุกรายการ</li>
+        </ul>
+        <div class="muted small">สำรองล่าสุด: <span id="bk-last">${last ? fmtDT(last) : "ยังไม่เคย"}</span></div>
+        <div class="part-actions"><button class="btn primary" type="button" data-act="dobackup">ดาวน์โหลดไฟล์ Excel</button><button class="btn" type="button" id="bk-copy" data-act="copytable" hidden>คัดลอกตารางชุดงาน</button></div>
+        <div class="bk-status" id="bk-status" role="status"></div>
+      </div>
+      <div class="bk-box">
+        <h3 class="small" style="margin:0">กู้ข้อมูลจากไฟล์สำรอง</h3>
+        ${ui.canAdmin ? `<p class="muted small" style="margin:0">เลือกไฟล์ .xlsx ที่ดาวน์โหลดจากปุ่มด้านบน <b>ข้อมูลส่วนกลางของทั้งทีม</b>จะถูกแทนที่ด้วยข้อมูลในไฟล์ แก้ไฟล์ใน Excel ได้ แต่อย่าลบคอลัมน์ที่ลงท้ายด้วย _code และคอลัมน์รหัส</p>
+        <input class="field" type="file" id="rs-file" accept=".xlsx" aria-label="เลือกไฟล์สำรอง">
+        <div class="bk-status" id="rs-status" role="status"></div>
+        <div><button class="btn confirm" type="button" id="rs-apply" data-act="dorestore" hidden>แทนที่ข้อมูลของทั้งทีมด้วยไฟล์นี้</button></div>`
+        : `<p class="muted small" style="margin:0">การกู้ข้อมูลจะแทนที่ข้อมูลของทั้งทีม จึงทำได้เฉพาะผู้ใช้ระดับ Editor หรือผู้ดูแลระบบ</p>`}
+      </div>
+    </div>`;
+}
+
+/* ---------- drawer ---------- */
+function renderNewForm() {
+  const custs = [...new Set(S.jigs.map((j) => j.customer))];
+  const owners = [...new Set(S.jigs.map((j) => j.owner).filter(Boolean))];
+  $("drawer").innerHTML = `
+    <div class="dr-head">
+      <div style="flex:1;min-width:0"><h2 class="plain" id="dr-title" tabindex="-1">งานใหม่</h2><p>เริ่มที่ขั้น “รับแบบ” · ช่องที่ไม่มีดอกจันกรอกทีหลังได้</p></div>
+      <button class="icon-btn boxed" type="button" data-act="close" aria-label="ปิดแผง">✕</button>
+    </div>
+    <form class="dr-body form-col" id="nj-form">
+      <label><span>ลูกค้า <span class="req">*</span></span>
+        <input class="field" id="nj-cust" list="nj-cust-list" required autocomplete="off" placeholder="เลือกหรือพิมพ์ชื่อลูกค้าใหม่">
+        <datalist id="nj-cust-list">${custs.map((c) => `<option value="${esc(c)}">`).join("")}</datalist></label>
+      <label><span>Jig No / ชื่องาน <span class="req">*</span></span>
+        <input class="field mono" id="nj-no" required autocomplete="off" placeholder="เช่น TS-1630"></label>
+      <label>ชื่อ Jig<input class="field" id="nj-name" placeholder="เช่น IC-HLD"></label>
+      <div class="two">
+        <label>จำนวน<input class="field mono" id="nj-qty" type="number" min="1" step="1" placeholder="1"></label>
+        <label>กำหนดส่ง<input class="field" id="nj-due" type="date"></label>
+      </div>
+      <label>ผู้รับผิดชอบ<input class="field" id="nj-owner" list="nj-owner-list" autocomplete="off">
+        <datalist id="nj-owner-list">${owners.map((o) => `<option value="${esc(o)}">`).join("")}</datalist></label>
+      <p class="empty-note">PO / Job ใส่ทีหลังได้ตอนลูกค้าเปิด PO · ชิ้นส่วนและเส้นทางของแต่ละชิ้นเพิ่มได้ในหน้ารายละเอียดหลังสร้างงาน</p>
+      <div><button class="btn primary" type="submit">สร้างงาน</button></div>
+    </form>`;
+}
+function renderDrawer() {
+  const dr = $("drawer");
+  if (ui.drawer === "new" || ui.drawer === "backup" || ui.drawer === "user") {
+    if (!dr.hidden && dr.dataset.kind === ui.drawer) return; // ไม่วาดทับฟอร์มที่กำลังกรอก
+    dr.hidden = $("scrim").hidden = false; dr.dataset.kind = ui.drawer;
+    ({ new: renderNewForm, backup: renderBackup, user: renderUserPanel })[ui.drawer]();
+    dr.setAttribute("aria-labelledby", "dr-title");
+    return;
+  }
+  const j = ui.drawer && jigById(ui.drawer);
+  dr.hidden = $("scrim").hidden = !j;
+  dr.dataset.kind = j ? "jig" : "";
+  if (!j) return;
+  dr.setAttribute("aria-labelledby", "dr-title");
+  const ro = ui.readOnly;
+  const si = SIDX[j.stage];
+  const next = j.closed ? null : STAGES[si + 1];
+  const os = ordersOf(j.id);
+  const r = readiness(j);
+  const logs = S.logs.filter((l) => l.jigId === j.id).sort((a, b) => b.at.localeCompare(a.at));
+  const banner = j.closed ? `<div class="closed-banner ${j.closed.kind}">
+      <div>${j.closed.kind === "done" ? "✓ " : ""}${CLOSED_LABEL[j.closed.kind]}${j.closed.at ? ` · ${fmtDT(j.closed.at)}` : ""}${j.closed.reason ? `<br><span>${esc(j.closed.reason)}${j.closed.from ? ` · ปิดที่ขั้น ${esc(stage(j.closed.from)?.label || "")}` : ""}</span>` : ""}</div>
+      <button class="btn sm" data-act="reopen" data-id="${j.id}">เปิดงานกลับ</button></div>` : "";
+  const roBanner = ro ? `<div class="ro-banner"><svg class="ico" aria-hidden="true"><use href="#i-lock"/></svg><span>บัญชีนี้ <b>ดูอย่างเดียว</b> · ขอสิทธิ์แก้ไขจากผู้ดูแลระบบ</span></div>` : "";
+  const closeSec = j.closed || ro ? "" : `<div class="dr-sec danger-zone"><h3><span>ปิดงาน</span></h3>
+      <p class="empty-note">ย้ายไปคลังงาน ไม่โชว์ในตารางและ Kanban เปิดกลับได้ภายหลัง · งานที่ส่งเสร็จแล้วให้เลือกขั้น “ส่งแล้ว” แทน</p>
+      <div><button class="btn danger-outline" type="button" data-act="closeask" data-id="${j.id}">ปิดงาน: ไม่ได้งาน / ยกเลิก…</button></div></div>`;
+  const fields = ro ? `<dl class="kv dr-sec">
+        <dt>ปัญหา / รอ</dt><dd>${issueSelect(j.issue)}</dd>
+        <dt>กำหนดส่ง</dt><dd>${j.due ? `${fmtD(j.due)} ${parseD(j.due).getFullYear() + 543}` : "—"} ${j.closed ? "" : dueBadge(j)}</dd>
+        <dt>PO / Job</dt><dd class="mono">${esc(j.po || "ยังไม่มี")}</dd>
+        <dt>ชื่อ Jig</dt><dd>${esc(j.name || "—")}</dd>
+        <dt>จำนวน</dt><dd class="mono">${esc(j.qty ?? "—")}</dd>
+        <dt>ผู้รับผิดชอบ</dt><dd>${esc(j.owner || "—")}</dd>
+      </dl>` : `<dl class="kv dr-sec">
+        <dt>ปัญหา / รอ</dt><dd>${issueSelect(j.issue, `data-act="issue" data-id="${j.id}"`)}</dd>
+        <dt>กำหนดส่ง</dt><dd class="due"><input class="field mono" type="date" lang="th" data-act="field" data-field="due" data-id="${j.id}" value="${esc(j.due || "")}" aria-label="กำหนดส่ง" aria-describedby="due-th"> <span id="due-th" class="small">${j.due ? fmtD(j.due) : ""}</span> ${j.closed ? "" : dueBadge(j)}</dd>
+        <dt>PO / Job</dt><dd><input class="field mono" data-act="field" data-field="po" data-id="${j.id}" value="${esc(j.po || "")}" placeholder="ยังไม่มี PO" aria-label="PO / Job"></dd>
+        <dt>ชื่อ Jig</dt><dd><input class="field" data-act="field" data-field="name" data-id="${j.id}" value="${esc(j.name || "")}" placeholder="—" aria-label="ชื่อ Jig"></dd>
+        <dt>จำนวน</dt><dd><input class="field mono" type="number" min="1" step="1" data-act="field" data-field="qty" data-id="${j.id}" value="${esc(j.qty ?? "")}" placeholder="—" aria-label="จำนวน"></dd>
+        <dt>ผู้รับผิดชอบ</dt><dd><input class="field" data-act="field" data-field="owner" data-id="${j.id}" value="${esc(j.owner || "")}" placeholder="—" aria-label="ผู้รับผิดชอบ"></dd>
+      </dl>`;
+  dr.innerHTML = `
+    <div class="dr-head">
+      <div style="flex:1;min-width:0"><h2 id="dr-title" tabindex="-1">${esc(j.jigNo)}</h2><p>${esc(j.customer)}${j.name ? " · " + esc(j.name) : ""}</p></div>
+      <button class="icon-btn boxed" data-act="close" aria-label="ปิดแผงรายละเอียด" type="button">✕</button>
+    </div>
+    <div class="dr-body">
+      ${roBanner}${banner}
+      <div class="dr-sec">
+        <h3><span>ขั้นงานของชุด</span><span>${ageBadge(j) || `ขั้น ${si + 1} จาก ${STAGES.length}`}</span></h3>
+        <div class="part-actions">${stageSelect(j.stage, `data-act="stage" data-id="${j.id}"`)}${next && !ro ? `<button class="btn sm" type="button" data-act="next" data-id="${j.id}">เลื่อนไป “${esc(next.label)}”${next.id === "done" ? "…" : " →"}</button>` : ""}</div>
+        <div class="route" style="grid-template-columns:repeat(${STAGES.length},1fr)" aria-hidden="true">${STAGES.map((s, i) => `<i class="${i < si ? "on" : i === si ? "cur" : ""}" title="${esc(s.label)}"></i>`).join("")}</div>
+        <div class="route-l" aria-hidden="true"><span>รับแบบ</span><span>เตรียมชิ้นส่วน</span><span>ส่งแล้ว</span></div>
+      </div>
+      ${fields}
+      <div class="dr-sec">
+        <h3><span>ชิ้นส่วน (${j.parts.length})</span><span>${r.total ? `พร้อม ${r.ready}/${r.total}${r.ready === r.total ? " · ✓ พร้อมประกอบ" : ""}` : ""}</span></h3>
+        ${j.parts.length ? `<div class="parts">${j.parts.map((p) => `<div class="part">
+            <div class="part-h"><div style="min-width:0"><div class="mono">${esc(p.name)}</div>${p.spec ? `<div class="spec">${esc(p.spec)}</div>` : ""}</div>${partStateHtml(p)}</div>
+            ${routeChips(j, p, !ro)}
+            ${ro ? "" : partActions(j, p)}
+          </div>`).join("")}</div>` : `<p class="empty-note">ยังไม่มีชิ้นส่วน${ro ? "" : " เพิ่มชิ้นส่วนพร้อมเลือกเส้นทางได้ด้านล่าง"}</p>`}
+        ${ro ? "" : `<div class="add-part">
+          <input class="field mono" id="dr-part" placeholder="ชื่อชิ้นส่วน เช่น TL-0702-01A HOLDER" aria-label="ชื่อชิ้นส่วนใหม่">
+          <select class="field" id="dr-preset" aria-label="เส้นทางของชิ้นส่วน">${PRESETS.map((p) => `<option value="${p.id}">${esc(p.label)}</option>`).join("")}</select>
+          <button class="btn" type="button" data-act="addpart" data-id="${j.id}">+ ชิ้นส่วน</button>
+        </div>`}
+      </div>
+      <div class="dr-sec"><h3><span>ของที่สั่ง (${os.length})</span>${j.closed || ro ? "" : `<button class="btn sm" data-act="addorder" data-id="${j.id}">+ สั่งของ</button>`}</h3>
+        ${os.length ? os.map((o) => `<div class="ord-row"><div class="l"><span class="kind ${o.kind}">${KINDS[o.kind]}</span>
+          <div>${esc(o.what)}${o.qty ? ` × ${o.qty}` : ""}${o.supplier ? ` · ${esc(o.supplier)}` : ""}</div>
+          <div class="muted small">${esc(o.status)} · สั่ง ${fmtD(o.ordered)} · กำหนดรับ ${fmtD(o.due)}${o.received ? ` · รับ ${fmtD(o.received)}` : ""}</div>
+          ${o.note ? `<div class="muted small">หมายเหตุ: ${esc(o.note)}</div>` : ""}</div>
+          <div class="part-actions">${isPending(o) && !ui.readOnly ? `<button class="btn sm" data-act="receive" data-oid="${o.id}">รับของแล้ว</button>` : isPending(o) ? "" : `<span class="badge ok">✓ รับครบ</span>`}${ui.readOnly ? "" : `<button class="btn sm outline" data-act="oedit" data-oid="${o.id}" aria-label="แก้ไขรายการ ${esc(o.what)}">แก้ไข</button>`}</div></div>`).join("") : `<p class="empty-note">ยังไม่มีรายการสั่ง</p>`}
+      </div>
+      <div class="dr-sec"><h3><span>หมายเหตุ</span></h3>
+        ${ro ? `<p style="margin:0">${esc(j.note || "—")}</p>` : `<textarea class="field" id="dr-note" data-id="${j.id}" aria-label="หมายเหตุ" placeholder="เช่น ลูกค้าขอเลื่อนส่ง">${esc(j.note)}</textarea>`}</div>
+      ${closeSec}
+      <div class="dr-sec"><h3><span>ประวัติ</span><span>บันทึกเวลาอัตโนมัติ</span></h3>
+        ${logs.length ? `<ul class="log">${logs.map((l) => `<li><time>${fmtDT(l.at)}</time><span>${esc(l.text)}${l.src === "excel" ? '<span class="src">Excel</span>' : ""}${l.by ? ` <span class="muted small">· ${esc(l.by)}</span>` : ""}</span></li>`).join("")}</ul>` : `<p class="empty-note">ยังไม่มีประวัติ</p>`}
+      </div>
+    </div>`;
+}
+
+/* ---------- render & events ---------- */
+function setView(v) {
+  if (!VIEWS.includes(v)) v = "table";
+  ui.view = v;
+  for (const t of document.querySelectorAll(".tab")) {
+    const on = t.dataset.view === v || (t.dataset.also || "").split(" ").includes(v);
+    t.setAttribute("aria-selected", String(on));
+    t.tabIndex = on ? 0 : -1;
+  }
+  for (const id of VIEWS) $("view-" + id).hidden = id !== v;
+  document.body.dataset.view = v;
+  $("page-title").textContent = VIEW_TITLE[v];
+  document.title = `${VIEW_TITLE[v]} · บอร์ดงาน Jig`;
+  try { history.replaceState(null, "", "#" + v); } catch (e) {}
+  try { localStorage.setItem(VIEW_KEY, v); } catch (e) {}
+}
+const STATUS_MSG = {
+  connecting: ["กำลังโหลดข้อมูลจากเซิร์ฟเวอร์…", "รอสักครู่ ข้อมูลของทั้งทีมกำลังมา"],
+  offline: ["เชื่อมต่อเซิร์ฟเวอร์ไม่ได้", "ตรวจว่าเครื่องเซิร์ฟเวอร์เปิดอยู่ และมือถือหรือคอมเครื่องนี้ต่อ Wi-Fi วงเดียวกับเซิร์ฟเวอร์ แล้วโหลดหน้านี้ใหม่"],
+  error: ["การเชื่อมต่อเซิร์ฟเวอร์ขาด", "โหลดหน้านี้ใหม่อีกครั้ง ข้อมูลที่บันทึกไปแล้วยังอยู่ครบบนเซิร์ฟเวอร์"],
+};
+// กล่องที่เลื่อนได้ในตัวเอง (แผงรายละเอียด, กระดาน Kanban, ตารางกว้าง) ถูกสร้างใหม่ทุกครั้งที่วาด
+// จึงจำตำแหน่งเลื่อนไว้แล้วคืนให้ ไม่ให้เด้งกลับบนสุด/ซ้ายสุดหลังกดปุ่ม
+const SCROLLERS = "#drawer .dr-body, #board, #board .lane-body, .mine-chips, .view .scroll-x";
+function scrollKey(el) {
+  // ใช้หัวข้อที่แสดงอยู่จริง: เปิดแผงของชุดอื่นต้องเริ่มบนสุด ไม่ใช่ตำแหน่งของชุดเดิม
+  if (el.matches(".dr-body")) return `dr:${$("drawer").dataset.kind || ""}:${$("drawer").querySelector(".dr-head h2, h2")?.textContent || ""}`;
+  if (el.id === "board") return `board:${ui.kb}`;
+  if (el.matches(".lane-body")) return `lane:${ui.kb}:${el.closest(".lane")?.dataset.stage}`;
+  const view = el.closest(".view");
+  return `${view?.id}:${el.className}:${view ? [...view.querySelectorAll("." + el.classList[0])].indexOf(el) : 0}`;
+}
+function keepScroll(draw) {
+  const saved = new Map();
+  for (const el of document.querySelectorAll(SCROLLERS)) if (el.scrollTop || el.scrollLeft) saved.set(scrollKey(el), [el.scrollTop, el.scrollLeft]);
+  const focusKey = (() => { const a = document.activeElement; return a?.dataset?.act ? [a.dataset.act, a.dataset.id, a.dataset.pid] : null; })();
+  draw();
+  for (const el of document.querySelectorAll(SCROLLERS)) {
+    const s = saved.get(scrollKey(el));
+    if (s) { el.scrollTop = s[0]; el.scrollLeft = s[1]; }
+  }
+  // ปุ่มที่กดถูกวาดใหม่: ย้าย focus ไปปุ่มเดียวกันโดยไม่เลื่อนจอ (สำหรับคนใช้คีย์บอร์ด)
+  if (focusKey && (!document.activeElement || document.activeElement === document.body)) {
+    const [act, id, pid] = focusKey;
+    const sel = `[data-act="${act}"]${id ? `[data-id="${CSS.escape(id)}"]` : ""}${pid ? `[data-pid="${CSS.escape(pid)}"]` : ""}`;
+    document.querySelector(sel)?.focus({ preventScroll: true });
+  }
+}
+// วาดใหม่ทั้งหน้า ยกเว้นตอนข้อมูลจากคนอื่นเข้ามา (force=false) ระหว่างที่เรากำลังพิมพ์อยู่ในส่วนนั้น
+function render(force) { keepScroll(() => renderAll(force)); }
+function renderAll(force) {
+  const focusBefore = document.activeElement;
+  syncStatus();
+  const typing = force === false && document.activeElement?.matches?.("input, textarea, select") ? document.activeElement : null;
+  const hold = (el) => { if (typing && el.contains(typing)) { ui.stale = true; return true; } return false; };
+  if (ui.conn !== "live") {
+    $("summary").innerHTML = "";
+    const [t, d] = STATUS_MSG[ui.conn];
+    for (const id of VIEWS) $("view-" + id).innerHTML = `<div class="status-msg"><b>${esc(t)}</b>${esc(d)}</div>`;
+    if (!hold($("drawer"))) drawerStep(focusBefore);
+    return;
+  }
+  renderSummary(); refreshCustOptions();
+  const view = $("view-" + ui.view);
+  if (!hold(view)) {
+    if (ui.view === "mine") renderMine();
+    if (ui.view === "more") renderMore();
+    if (ui.view === "table") renderTable();
+    if (ui.view === "kanban") renderKanban();
+    if (ui.view === "orders") renderOrders();
+    if (ui.view === "archive") renderArchive();
+  }
+  if (!hold($("drawer"))) drawerStep(focusBefore);
+}
+// เปิดแผง: focus ไปที่หัวข้อ · ปิดแผง: คืน focus ให้ปุ่มที่กดเปิด
+let drawerOpener = null;
+function drawerStep(before = document.activeElement) {
+  const dr = $("drawer"), was = !dr.hidden;
+  renderDrawer();
+  const now = !dr.hidden;
+  if (!was && now) {
+    drawerOpener = before && before !== document.body ? before : null;
+    document.body.style.overflow = "hidden";
+    requestAnimationFrame(() => { if (!dr.contains(document.activeElement)) $("dr-title")?.focus(); });
+  } else if (was && !now) {
+    document.body.style.overflow = "";
+    const back = drawerOpener; drawerOpener = null;
+    // preventScroll: ถ้าหาปุ่มเดิมไม่เจอแล้ว focus ไปที่ main จะทำให้หน้าเด้งไปบนสุด
+    if (back && document.contains(back)) back.focus({ preventScroll: true });
+    else if (back?.dataset?.id) ($("view-" + ui.view).querySelector(`[data-act="${back.dataset.act}"][data-id="${back.dataset.id}"]`) || $("main")).focus({ preventScroll: true });
+  }
+}
+function trapFocus(e, box) {
+  const f = [...box.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])')].filter((x) => !x.disabled && x.offsetParent !== null);
+  if (!f.length) return;
+  const first = f[0], last = f[f.length - 1];
+  if (e.shiftKey && (document.activeElement === first || !box.contains(document.activeElement))) { last.focus(); e.preventDefault(); }
+  else if (!e.shiftKey && (document.activeElement === last || !box.contains(document.activeElement))) { first.focus(); e.preventDefault(); }
+}
+function closeTools() { if (!ui.toolsOpen) return; ui.toolsOpen = false; $("tools").classList.remove("open"); $("search-toggle").setAttribute("aria-expanded", "false"); }
+$("search-toggle").addEventListener("click", () => {
+  ui.toolsOpen = !ui.toolsOpen;
+  $("tools").classList.toggle("open", ui.toolsOpen);
+  $("search-toggle").setAttribute("aria-expanded", String(ui.toolsOpen));
+  if (ui.toolsOpen) $("f-q").focus();
+});
+document.addEventListener("focusout", () => setTimeout(() => {
+  if (ui.stale && !document.activeElement?.matches?.("input, textarea, select")) { ui.stale = false; render(false); }
+}, 0));
+let toastT;
+// toast ที่มีปุ่ม (เช่น เลิกทำ) ค้างจนกดปิดหรือมีข้อความใหม่มาแทน ข้อความธรรมดาหายใน 4 วินาที
+function toast(msg, action) {
+  const t = $("toast");
+  t.innerHTML = `<span>${esc(msg)}</span>${action ? `<button class="toast-btn" type="button" id="toast-act">${esc(action.label)}</button><button class="toast-x" type="button" id="toast-x" aria-label="ปิดข้อความ">×</button>` : ""}`;
+  if (action) {
+    $("toast-act").onclick = () => { t.hidden = true; action.fn(); };
+    $("toast-x").onclick = () => { t.hidden = true; };
+  }
+  t.hidden = false; clearTimeout(toastT);
+  if (!action) toastT = setTimeout(() => (t.hidden = true), 4000);
+}
+// ปุ่มเลิกทำหา Jig จาก id ใหม่ทุกครั้ง เพราะข้อมูลจากส่วนกลางอาจสร้างออบเจกต์ใหม่ไปแล้ว
+function undoClose(id) {
+  return { label: "เลิกทำ", fn: () => { const j = jigById(id); if (!j) return; reopen(j); commit(`${j.jigNo} กลับมาที่ขั้น ${stage(j.stage).label}`); } };
+}
+function stageChange(j, to, how) {
+  const prev = j.stage, id = j.id;
+  const warn = setJigStage(j, to, how);
+  const undo = { label: "เลิกทำ", fn: () => { const x = jigById(id); if (!x) return; setJigStage(x, prev); commit(`${x.jigNo} กลับมาที่ขั้น ${stage(prev).label}`); } };
+  commit(`${j.jigNo} → ${stage(to).label}${warn}`, undo);
+}
+
+/* ---------- กล่องยืนยัน (dialog ของเบราว์เซอร์: กัก focus และ Esc ปิดให้เอง) ---------- */
+function openDialog({ title, lead = "", body = "", actions, onCancel }) {
+  const d = $("dlg");
+  d.innerHTML = `<form method="dialog" class="dlg-in">
+      <h2 id="dlg-title" tabindex="-1">${esc(title)}</h2>
+      ${lead ? `<p class="lead">${lead}</p>` : ""}${body}
+      <div class="dlg-actions">${actions.map((x, i) => `<button class="btn ${x.cls || ""}" type="button" data-dlg="${i}">${x.html || esc(x.label)}</button>`).join("")}</div>
+    </form>`;
+  d.setAttribute("aria-labelledby", "dlg-title");
+  let done = false;
+  d.querySelectorAll("[data-dlg]").forEach((b) => b.addEventListener("click", () => {
+    const x = actions[Number(b.dataset.dlg)];
+    done = true; d.close();
+    if (x.fn) x.fn(d); else if (onCancel) onCancel();
+  }));
+  d.addEventListener("close", () => { if (!done && onCancel) onCancel(); }, { once: true });
+  closePop();
+  d.showModal();
+  d.querySelector("#dlg-title").focus();
+}
+const CANCEL = (label = "ยกเลิก") => ({ label });
+
+// ทุกทางที่เลื่อนขั้นชุด (select, ปุ่มถัดไป, ลากการ์ด, เมนู) ผ่านตรงนี้
+function requestStage(j, to, how) {
+  if (!j || (j.stage === to && !j.closed)) { render(true); return; }
+  const from = j.stage;
+  const crossing = SIDX[from] <= SIDX.prep && SIDX[to] > SIDX.prep;
+  const left = crossing ? j.parts.filter((p) => !partReady(p)) : [];
+  if (left.length) return askPrepSkip(j, to, how, left);
+  if (to === "done") {
+    return openDialog({
+      title: `ส่ง ${j.jigNo} แล้ว?`,
+      lead: "ชุดนี้จะย้ายเข้าคลังงาน ไม่โชว์ในตารางและ Kanban · เลิกทำได้จากแถบล่าง หรือเปิดงานกลับจากคลังงาน",
+      actions: [CANCEL(), { label: "ยืนยัน ส่งแล้ว", cls: "primary", fn: () => stageChange(jigById(j.id), to, how) }],
+      onCancel: () => render(true),
+    });
+  }
+  stageChange(j, to, how);
+}
+// D10: เลื่อนชุดผ่าน "เตรียมชิ้นส่วน" ทั้งที่ชิ้นยังไม่ครบ
+function askPrepSkip(j, to, how, left) {
+  const r = readiness(j);
+  const stdLeft = stdOrders(j.id).filter(isPending);
+  const n = left.length;
+  openDialog({
+    title: `ชิ้นส่วนยังไม่ครบ ${r.total - r.ready} จาก ${r.total}`,
+    lead: `เลื่อน <b class="mono">${esc(j.jigNo)}</b> จาก ${esc(stage(j.stage).label)} → ${esc(stage(to).label)}`,
+    body: `<ul class="dlg-list">${left.map((p) => `<li><b class="mono">${esc(p.name)}</b>${partStateHtml(p)}</li>`).join("")}${stdLeft.map((o) => `<li><span>Std part ${esc(o.what)}</span><span class="muted">${esc(o.status)} · ไม่ปิดให้อัตโนมัติ</span></li>`).join("")}</ul>`,
+    actions: [
+      CANCEL("ยกเลิก ไม่เลื่อน"),
+      { cls: "", html: `<span class="choice" style="padding:0"><span>เลื่อนชุดอย่างเดียว</span><small>ชิ้นค้างสถานะเดิม การ์ดจะมีป้าย “ชิ้นส่วนค้าง ${n}”</small></span>`, fn: () => stageChange(jigById(j.id), to, how) },
+      { cls: "primary", html: `<span class="choice" style="padding:0"><span>ปิด ${n} ชิ้นเป็นเสร็จ แล้วเลื่อน</span><small>ลงเวลาเสร็จเป็นตอนนี้ · ติดป้าย “อัตโนมัติ”</small></span>`, fn: () => closeAndMove(j.id, to, how) },
+    ],
+    onCancel: () => render(true),
+  });
+}
+// เขียน step เองโดยไม่แตะ partAdvance: ขั้นที่ปิดจากการเลื่อนชุดติด auto: true
+function closeRemainingSteps(j) {
+  const at = nowIso(), snap = [];
+  for (const p of j.parts) {
+    if (partReady(p)) continue;
+    snap.push([p.id, clone(p.steps)]);
+    const names = [];
+    for (const s of p.steps) {
+      if (s.state === "done") continue;
+      if (!s.start) s.start = at;
+      s.state = "done"; s.end = at; s.auto = true;
+      names.push(OPS[s.op].label);
+    }
+    log(j.id, `${p.name}: ${names.join(", ")} ปิดพร้อมเลื่อนขั้น (อัตโนมัติ)`);
+  }
+  return snap;
+}
+function closeAndMove(id, to, how) {
+  const j = jigById(id); if (!j) return;
+  const from = j.stage;
+  const snap = closeRemainingSteps(j);
+  setJigStage(j, to, how);
+  commit(`${j.jigNo} → ${stage(to).label} · ปิดชิ้นที่เหลือ ${snap.length} ชิ้น`, { label: "เลิกทำ", fn: () => {
+    const x = jigById(id); if (!x) return;
+    for (const [pid, steps] of snap) { const p = partOf(x, pid); if (p) p.steps = steps; }
+    log(x.id, `เลิกทำ: เปิดชิ้นส่วน ${snap.length} ชิ้นกลับเป็นสถานะเดิม`);
+    setJigStage(x, from);
+    commit(`${x.jigNo} กลับมาที่ขั้น ${stage(from).label}`);
+  } });
+}
+// ปิดงาน (ไม่ได้งาน / ยกเลิก): เลือกเหตุผลครบ 5 ข้อตาม LOST_REASONS
+function askClose(j) {
+  openDialog({
+    title: `ปิดงาน ${j.jigNo}?`,
+    lead: "ย้ายไปคลังงาน เปิดงานกลับได้ทุกเมื่อ · เลือกเหตุผล",
+    body: `<fieldset class="radio-list"><legend class="sr-only">เหตุผลที่ปิดงาน</legend>${LOST_REASONS.map((x, i) => `<label><input type="radio" name="lost-r" value="${esc(x)}"${(j.stage === "quote" || j.stage === "waitpo") ? (i === 0 ? " checked" : "") : ""}>${esc(x)}</label>`).join("")}</fieldset>`,
+    actions: [CANCEL(), { label: `ปิดงาน ${j.jigNo}`, cls: "danger", fn: (d) => {
+      const r = d.querySelector('input[name="lost-r"]:checked')?.value;
+      if (!r) { toast("เลือกเหตุผลก่อนปิดงาน"); return askClose(j); }
+      const x = jigById(j.id); if (!x) return;
+      closeLost(x, r); ui.drawer = null;
+      commit(`${x.jigNo} ปิดงาน: ${r} · ย้ายเข้าคลังงาน`, undoClose(x.id));
+    } }],
+  });
+}
+// เสร็จทั้งชุด: ทุกชิ้นที่ยังไม่พร้อมอยู่ขั้นเดียวกัน
+function batchInfo(j) {
+  const left = j.parts.filter((p) => !partReady(p));
+  if (left.length < 2) return null;
+  const op = curStep(left[0]).op;
+  return left.every((p) => curStep(p).op === op) ? { op, parts: left } : null;
+}
+// ข้อความปุ่มระดับชุด: งานนอกที่ยังไม่ส่งต้องผ่านหน้าส่ง (ใส่ร้าน/กำหนดรับ) ไม่ใช่กดเสร็จรวด
+function batchLabel(b) {
+  const o = OPS[b.op], n = b.parts.length;
+  if (o.ext) return b.parts.some((p) => curStep(p).state === "wait") ? `${o.send} ${n} ชิ้น…` : `${o.recv} ทั้ง ${n} ชิ้น…`;
+  return `${o.label} เสร็จทั้ง ${n} ชิ้น…`;
+}
+function askBatch(j) {
+  const b = batchInfo(j); if (!b) return;
+  if (OPS[b.op].ext && b.parts.some((p) => curStep(p).state === "wait")) return askSend(j, b.parts.find((p) => curStep(p).state === "wait"));
+  const lbl = OPS[b.op].label, n = b.parts.length;
+  const waiting = b.parts.filter((p) => curStep(p).state === "wait").length;
+  openDialog({
+    title: OPS[b.op].ext ? `${OPS[b.op].recv} ทั้ง ${n} ชิ้น?` : `${lbl} เสร็จทั้ง ${n} ชิ้น?`,
+    lead: `ชุด <b class="mono">${esc(j.jigNo)}</b> · ลงเวลาเสร็จเป็นตอนนี้ทุกชิ้น${waiting ? ` · ${waiting} ชิ้นที่ยังไม่เริ่มจะลงเวลาเริ่มเป็นตอนนี้ด้วย` : ""}`,
+    body: `<ul class="dlg-list">${b.parts.map((p) => `<li><b class="mono">${esc(p.name)}</b>${partStateHtml(p)}</li>`).join("")}</ul>`,
+    actions: [CANCEL(), { label: `ยืนยัน เสร็จทั้ง ${n} ชิ้น`, cls: "primary", fn: () => {
+      const x = jigById(j.id); if (!x) return;
+      const done = [];
+      for (const p0 of b.parts) {
+        const p = partOf(x, p0.id), s = p && curStep(p);
+        if (!s || s.op !== b.op) continue;
+        let k = 0;
+        while (s.state !== "done" && k < 3) { partAdvance(x, p); k++; }
+        done.push([p.id, k]);
+      }
+      commit(readyMsg(x) || `${x.jigNo}: ${lbl} เสร็จ ${done.length} ชิ้น`, { label: "เลิกทำ", fn: () => {
+        const y = jigById(x.id); if (!y) return;
+        for (const [pid, k] of done) { const p = partOf(y, pid); if (p) for (let i = 0; i < k; i++) partBack(y, p); }
+        commit(`${y.jigNo}: เลิกทำ ${lbl} ${done.length} ชิ้น`);
+      } });
+    } }],
+  });
+}
+
+/* ---------- งานนอก: ส่ง (ร้าน + กำหนดรับ) / แก้ไข ---------- */
+function knownShops() {
+  const shops = new Set();
+  for (const j of S.jigs) for (const p of j.parts) for (const s of p.steps) if (s.shop) shops.add(s.shop);
+  for (const o of S.orders) if (o.supplier) shops.add(o.supplier);
+  return [...shops].sort((a, b) => a.localeCompare(b, "th"));
+}
+function shopFields(shop, due) {
+  return `<div class="form-col" style="margin-top:12px">
+      <label>ร้าน / Supplier<input class="field" id="sd-shop" list="sd-shops" autocomplete="off" value="${esc(shop || "")}" placeholder="เช่น ร้านชุบ ABC"></label>
+      <datalist id="sd-shops">${knownShops().map((x) => `<option value="${esc(x)}">`).join("")}</datalist>
+      <label>กำหนดรับกลับ<input class="field" id="sd-due" type="date" value="${esc(due || "")}"></label>
+    </div>`;
+}
+// ส่งทีละงาน: เลือกชิ้นในชุดเดียวกันที่รอขั้นนี้ ส่งพร้อมกันได้ในครั้งเดียว
+function askSend(j, p0, prefill = {}) {
+  const s0 = curStep(p0); if (!s0) return;
+  const o = OPS[s0.op];
+  const same = j.parts.filter((p) => { const s = curStep(p); return s && s.op === s0.op && s.state === "wait"; });
+  const picked = new Set(prefill.ids || same.map((p) => p.id));
+  openDialog({
+    title: `${o.send} · ${j.jigNo}`,
+    lead: "บันทึกร้านและวันที่ควรได้ของคืน ระบบจะเตือนเมื่อเลยกำหนด · วันส่งลงเป็นวันนี้ให้เอง",
+    body: shopFields(prefill.shop, prefill.due ?? isoPlus(7)) + (same.length > 1
+      ? `<fieldset class="radio-list" style="margin-top:12px"><legend>ชิ้นที่ส่งรอบนี้</legend>${same.map((p) => `<label><input type="checkbox" name="sd-p" value="${esc(p.id)}"${picked.has(p.id) ? " checked" : ""}><span class="mono">${esc(p.name)}</span></label>`).join("")}</fieldset>`
+      : ""),
+    actions: [CANCEL(), { label: "บันทึกการส่ง", cls: "primary", fn: (d) => {
+      const shop = d.querySelector("#sd-shop").value.trim(), due = d.querySelector("#sd-due").value || null;
+      const ids = same.length > 1 ? [...d.querySelectorAll('input[name="sd-p"]:checked')].map((x) => x.value) : [p0.id];
+      if (!shop || !ids.length) { toast(!shop ? "ใส่ชื่อร้านก่อนบันทึกการส่ง" : "เลือกอย่างน้อย 1 ชิ้น"); return askSend(j, p0, { shop, due, ids }); }
+      const x = jigById(j.id); if (!x) return;
+      const sent = [];
+      for (const pid of ids) {
+        const p = partOf(x, pid), s = p && curStep(p);
+        if (!s || s.op !== s0.op || s.state !== "wait") continue;
+        partAdvance(x, p);
+        s.shop = shop; s.due = due;
+        sent.push(p);
+      }
+      log(x.id, `${o.send} ${sent.length} ชิ้น: ${shop}${due ? ` · กำหนดรับ ${fmtD(due)}` : ""} (${sent.map((p) => p.name).join(", ")})`);
+      commit(`${o.send} ${sent.length} ชิ้น · ${shop}${due ? ` · รับ ${fmtD(due)}` : ""}`, { label: "เลิกทำ", fn: () => {
+        const y = jigById(x.id); if (!y) return;
+        for (const p0 of sent) {
+          const p = partOf(y, p0.id), s = p && curStep(p);
+          if (!s || s.op !== s0.op || s.state !== "doing") continue;
+          partBack(y, p); delete s.shop; delete s.due;
+        }
+        commit(`${y.jigNo}: เลิกส่ง ${sent.length} ชิ้น`);
+      } });
+    } }],
+    onCancel: () => render(true),
+  });
+}
+function askExtEdit(j, p, i) {
+  const s = p.steps[i]; if (!s) return;
+  openDialog({
+    title: `แก้ร้าน / กำหนดรับ · ${p.name}`,
+    lead: `${esc(OPS[s.op].label)} · ส่งเมื่อ ${s.start ? fmtD(s.start) : "—"}`,
+    body: shopFields(s.shop, s.due),
+    actions: [CANCEL(), { label: "บันทึก", cls: "primary", fn: (d) => {
+      const x = jigById(j.id), q = x && partOf(x, p.id), t = q && q.steps[i]; if (!t) return;
+      const shop = d.querySelector("#sd-shop").value.trim() || t.shop || "", due = d.querySelector("#sd-due").value || null;
+      if (shop === (t.shop || "") && due === (t.due || null)) return;
+      log(x.id, `${q.name}: แก้งานนอก ${t.shop || "—"} / ${t.due ? fmtD(t.due) : "—"} → ${shop || "—"} / ${due ? fmtD(due) : "—"}`);
+      t.shop = shop; t.due = due;
+      commit("บันทึกร้าน / กำหนดรับแล้ว");
+    } }],
+  });
+}
+
+/* ---------- แก้ไขรายการสั่ง (พิมพ์ผิด / เปลี่ยนจำนวน / หมายเหตุ) ---------- */
+const ORDER_FIELDS = [["kind", "ประเภท"], ["what", "รายการ"], ["qty", "จำนวน"], ["supplier", "Supplier"], ["ordered", "สั่งเมื่อ"], ["due", "กำหนดรับ"], ["note", "หมายเหตุ"]];
+function askOrderEdit(o) {
+  const j = jigById(o.jigId);
+  openDialog({
+    title: `แก้ไขรายการสั่ง`,
+    lead: `ชุด <b class="mono">${esc(j?.jigNo || "")}</b> · ${esc(o.status)}`,
+    body: `<div class="form-col" style="margin-top:12px">
+        <label>ประเภท<select class="field" id="oe-kind">${Object.entries(KINDS).map(([k, v]) => `<option value="${k}"${k === o.kind ? " selected" : ""}>${esc(v)}</option>`).join("")}</select></label>
+        <label>รายการ / รหัสสินค้า<input class="field mono" id="oe-what" value="${esc(o.what)}"></label>
+        <div class="two">
+          <label>จำนวน<input class="field mono" id="oe-qty" type="number" min="1" step="1" value="${esc(o.qty ?? "")}"></label>
+          <label>Supplier<input class="field" id="oe-sup" list="oe-sups" value="${esc(o.supplier || "")}"><datalist id="oe-sups">${knownShops().map((x) => `<option value="${esc(x)}">`).join("")}</datalist></label>
+        </div>
+        <div class="two">
+          <label>สั่งเมื่อ<input class="field" id="oe-ordered" type="date" value="${esc(o.ordered || "")}"></label>
+          <label>กำหนดรับ<input class="field" id="oe-due" type="date" value="${esc(o.due || "")}"></label>
+        </div>
+        <label>หมายเหตุ<textarea class="field" id="oe-note" rows="2">${esc(o.note || "")}</textarea></label>
+      </div>`,
+    actions: [
+      ...(ui.canAdmin ? [{ label: "ลบรายการนี้…", cls: "danger-outline", fn: () => askOrderDelete(o.id) }] : []),
+      CANCEL(),
+      { label: "บันทึก", cls: "primary", fn: (d) => {
+        const x = S.orders.find((y) => y.id === o.id); if (!x) return;
+        const v = (id) => d.querySelector(id).value.trim();
+        const next = { kind: v("#oe-kind"), what: v("#oe-what") || x.what, qty: v("#oe-qty") ? Math.max(1, Math.round(Number(v("#oe-qty")) || 1)) : null,
+          supplier: v("#oe-sup"), ordered: v("#oe-ordered") || null, due: v("#oe-due") || null, note: v("#oe-note") };
+        const show = (k, val) => (val == null || val === "" ? "—" : k === "kind" ? KINDS[val] : k === "ordered" || k === "due" ? fmtD(val) : val);
+        const nz = (val) => (val === "" || val === undefined ? null : val);
+        const changes = ORDER_FIELDS.filter(([k]) => nz(x[k]) !== nz(next[k]))
+          .map(([k, label]) => `${label} ${show(k, x[k])} → ${show(k, next[k])}`);
+        if (!changes.length) return;
+        Object.assign(x, next);
+        log(x.jigId, `แก้รายการสั่ง ${x.what}: ${changes.join(" · ")}`);
+        commit("บันทึกการแก้ไขแล้ว");
+      } },
+    ],
+  });
+}
+// ลบได้เฉพาะ Editor ขึ้นไป (เซิร์ฟเวอร์ยอมให้ลบเอกสารเฉพาะระดับนี้)
+function askOrderDelete(oid) {
+  const o = S.orders.find((y) => y.id === oid); if (!o) return;
+  openDialog({
+    title: `ลบรายการ ${o.what}?`,
+    lead: "ใช้กรณีบันทึกผิดหรือซ้ำ ลบแล้วกู้คืนไม่ได้ (ยกเว้นจากไฟล์สำรอง)",
+    actions: [CANCEL(), { label: "ลบรายการ", cls: "danger", fn: () => {
+      const i = S.orders.findIndex((y) => y.id === oid); if (i < 0) return;
+      const [x] = S.orders.splice(i, 1);
+      log(x.jigId, `ลบรายการสั่ง ${x.what}${x.qty ? ` × ${x.qty}` : ""}${x.supplier ? ` (${x.supplier})` : ""}`);
+      commit("ลบรายการแล้ว");
+    } }],
+  });
+}
+
+/* ---------- นำเข้าไฟล์ CSV ของ Misumi: รหัสสินค้า + จำนวน ---------- */
+async function readOrderFile(file) {
+  const X = await loadXLSX();
+  const buf = await file.arrayBuffer();
+  let wb;
+  if (/\.xlsx?$/i.test(file.name)) wb = X.read(buf, { type: "array" });
+  else {
+    // CSV จาก Excel ภาษาไทยมักเป็น Windows-874 ไม่ใช่ UTF-8
+    let text;
+    try { text = new TextDecoder("utf-8", { fatal: true }).decode(buf); } catch (e) { text = new TextDecoder("windows-874").decode(buf); }
+    wb = X.read(text.replace(/^﻿/, ""), { type: "string", raw: true });
+  }
+  const rows = X.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], { header: 1, defval: "", raw: false });
+  return parseOrderRows(rows);
+}
+function parseOrderRows(rows) {
+  const isCode = (h) => /รหัส|part|product|item|model|code/i.test(h);
+  const isQty = (h) => /จำนวน|qty|quantity/i.test(h);
+  const hi = rows.findIndex((r) => r.some((c) => isCode(String(c))) && r.some((c) => isQty(String(c))));
+  let ci, qi, start;
+  if (hi >= 0) { ci = rows[hi].findIndex((c) => isCode(String(c))); qi = rows[hi].findIndex((c) => isQty(String(c))); start = hi + 1; }
+  else { // ไม่มีหัวตาราง: No. | รหัส | จำนวน หรือ รหัส | จำนวน
+    const wide = rows.some((r) => r.filter((c) => String(c).trim() !== "").length >= 3);
+    [ci, qi, start] = wide ? [1, 2, 0] : [0, 1, 0];
+  }
+  const items = [];
+  for (const r of rows.slice(start)) {
+    const code = String(r[ci] ?? "").trim();
+    if (!code) continue;
+    const q = Number(String(r[qi] ?? "").replace(/,/g, "").trim());
+    items.push({ code, qty: Number.isFinite(q) && q >= 1 ? Math.round(q) : null });
+  }
+  return items;
+}
+/* ---------- นำเข้า PDF "ใบยืนยันการสั่งซื้อสินค้า" ของ Misumi ----------
+   แต่ละรายการมี 3 บรรทัด: (จำนวน PCS · ราคา) / (รหัสสินค้า · วันส่ง(วันรับ)) / (ชื่อสินค้า)
+   ยึดบรรทัดวันที่ "dd/mm/yyyy(dd/mm)" เป็นหลัก แล้วหารหัสในบรรทัดเดียวกัน กับจำนวนในบรรทัดเหนือขึ้นไป */
+let pdfjsP;
+function loadPDFJS() {
+  if (window.pdfjsLib) return Promise.resolve(window.pdfjsLib);
+  return (pdfjsP ||= loadScript("/vendor/pdfjs/pdf.min.js")
+    .then(() => { window.pdfjsLib.GlobalWorkerOptions.workerSrc = "/vendor/pdfjs/pdf.worker.min.js"; return window.pdfjsLib; })
+    .catch((e) => { pdfjsP = null; throw e; }));
+}
+const MIS_DATE = /^(\d{2})\/(\d{2})\/(\d{4})\((\d{2})\/(\d{2})\)$/;
+async function readMisumiPdf(file) {
+  const lib = await loadPDFJS();
+  const pdf = await lib.getDocument({ data: new Uint8Array(await file.arrayBuffer()) }).promise;
+  const items = [];
+  let po = null;
+  for (let n = 1; n <= pdf.numPages; n++) {
+    const page = await pdf.getPage(n);
+    const h = page.getViewport({ scale: 1 }).height;
+    const t = (await page.getTextContent()).items
+      .filter((it) => it.str && it.str.trim())
+      .map((it) => ({ s: it.str.trim(), x: it.transform[4], y: h - it.transform[5] }));
+    const sameLine = (a, b) => Math.abs(a.y - b.y) < 4;
+    if (!po) {
+      const label = t.find((it) => /ใบสั่งซื้อ:?$/.test(it.s) && !/ลูกค้า|วันที่/.test(it.s));
+      const right = label && t.filter((it) => sameLine(it, label) && it.x > label.x && /^[A-Z0-9]{6,}$/.test(it.s)).sort((a, b) => a.x - b.x)[0];
+      po = right?.s || t.find((it) => /^FB[0-9A-Z]{6,}$/.test(it.s))?.s || null;
+    }
+    for (const d of t) {
+      const m = MIS_DATE.exec(d.s.replace(/\s+/g, ""));
+      if (!m) continue;
+      const [, sd, sm, sy, rd, rm] = m.map(Number);
+      // วันรับในวงเล็บไม่มีปี: ถ้าเดือนรับน้อยกว่าเดือนส่ง แปลว่าข้ามปี
+      const ry = rm < sm ? sy + 1 : sy;
+      const code = t.filter((it) => sameLine(it, d) && it.x < d.x && !/^0\d{5}$/.test(it.s) && /^[A-Za-z0-9][A-Za-z0-9.\-\/_]*$/.test(it.s))
+        .sort((a, b) => a.x - b.x)[0];
+      if (!code) continue;
+      // จำนวน = ตัวเลขที่มีหน่วย (PCS ฯลฯ) ต่อท้าย ในบรรทัดเหนือรหัส
+      const band = t.filter((it) => it.y < d.y - 3 && it.y > d.y - 26);
+      let qty = null;
+      for (const it of band) {
+        const one = /^(\d[\d,]*)\s*[A-Za-z]{1,5}$/.exec(it.s);
+        if (one) { qty = Number(one[1].replace(/,/g, "")); break; }
+        if (/^\d[\d,]*$/.test(it.s) && band.some((u) => sameLine(u, it) && u.x > it.x && u.x - it.x < 40 && /^[A-Za-z]{1,5}$/.test(u.s))) { qty = Number(it.s.replace(/,/g, "")); break; }
+      }
+      items.push({ code: code.s, qty: qty >= 1 ? qty : null, ship: `${sy}-${pad(sm)}-${pad(sd)}`, due: `${ry}-${pad(rm)}-${pad(rd)}` });
+    }
+  }
+  return { items, po };
+}
+function askImport(items, fileName, meta = {}) {
+  const open = S.jigs.filter((j) => !j.closed);
+  const pref = open.some((j) => j.id === ui.prefJig) ? ui.prefJig : (open.find((j) => j.stage === "prep") || open[0])?.id;
+  openDialog({
+    title: `นำเข้า ${items.length} รายการ`,
+    lead: meta.pdf
+      ? `จากใบยืนยันการสั่งซื้อ <b>${esc(meta.po || fileName)}</b> · กำหนดรับเติมจากวันในวงเล็บให้แล้ว · <b>แถวที่ Misumi ยกเลิก (ตัวแดงในใบ) ให้เอาติ๊กออก</b>`
+      : `จากไฟล์ <b>${esc(fileName)}</b> · ตรวจรหัสและจำนวน แล้วใส่กำหนดรับตามที่เว็บ Misumi แจ้ง`,
+    body: `<div class="form-col" style="margin-top:12px">
+        <label>สั่งให้ชุด / Jig<select class="field" id="im-jig">${open.map((j) => `<option value="${j.id}"${j.id === pref ? " selected" : ""}>${esc(j.jigNo)} · ${esc(j.customer)}</option>`).join("")}</select></label>
+        <div class="two">
+          <label>Supplier<input class="field" id="im-sup" value="Misumi" list="im-sups"><datalist id="im-sups">${knownShops().map((x) => `<option value="${esc(x)}">`).join("")}</datalist></label>
+          <label>ประเภท<select class="field" id="im-kind"><option value="stdpart" selected>Std part</option><option value="material">Material</option></select></label>
+        </div>
+        <label>กำหนดรับ (ใส่ครั้งเดียว ใช้กับทุกแถวที่ยังไม่ได้ใส่)<input class="field" id="im-due" type="date"></label>
+      </div>
+      <div class="im-wrap"><table class="im-table">
+        <thead><tr><th><span class="sr-only">เลือก</span></th><th>รหัสสินค้า</th><th>จำนวน</th><th>กำหนดรับ</th></tr></thead>
+        <tbody>${items.map((it, i) => `<tr data-i="${i}">
+          <td><input type="checkbox" class="im-on" checked aria-label="นำเข้า ${esc(it.code)}"></td>
+          <td class="mono">${esc(it.code)}${it.ship ? `<div class="muted small" style="font-family:var(--font-body)">Misumi ส่ง ${fmtD(it.ship)}</div>` : ""}<div class="im-flag"></div></td>
+          <td><input class="field mono im-qty" type="number" min="1" step="1" value="${it.qty ?? ""}" aria-label="จำนวน ${esc(it.code)}"></td>
+          <td><input class="field im-rdue" type="date" value="${esc(it.due || "")}"${it.due ? ' data-touched="1"' : ""} aria-label="กำหนดรับ ${esc(it.code)}"></td>
+        </tr>`).join("")}</tbody></table></div>`,
+    actions: [CANCEL(), { label: "นำเข้า", cls: "primary", fn: (d) => {
+      const jigId = d.querySelector("#im-jig").value, kind = d.querySelector("#im-kind").value;
+      const sup = d.querySelector("#im-sup").value.trim(), common = d.querySelector("#im-due").value || null;
+      const rows = [...d.querySelectorAll("tbody tr")].filter((tr) => tr.querySelector(".im-on").checked);
+      const stamp = Date.now().toString(36), today = isoToday();
+      const made = rows.map((tr, k) => ({
+        id: `O${stamp}${k}`, jigId, kind, what: items[Number(tr.dataset.i)].code,
+        qty: Math.max(1, Math.round(Number(tr.querySelector(".im-qty").value) || 1)), supplier: sup,
+        ordered: today, due: tr.querySelector(".im-rdue").value || common, received: null, status: "สั่งแล้ว-รอรับ",
+        src: meta.pdf ? "pdf" : "csv", note: meta.po ? `PO ${sup || "Misumi"} ${meta.po}` : "",
+      }));
+      if (!made.length) return;
+      S.orders.push(...made); ui.prefJig = jigId;
+      log(jigId, `นำเข้าการสั่ง ${made.length} รายการจาก ${meta.po ? `ใบสั่งซื้อ ${meta.po}` : fileName}${sup ? ` (${sup})` : ""}: ${made.map((o) => `${o.what} × ${o.qty}`).join(", ")}`);
+      const ids = new Set(made.map((o) => o.id));
+      commit(`นำเข้า ${made.length} รายการแล้ว`, ui.canAdmin ? { label: "เลิกทำ", fn: () => {
+        S.orders = S.orders.filter((o) => !ids.has(o.id));
+        log(jigId, `เลิกนำเข้า ${ids.size} รายการจาก ${fileName}`);
+        commit(`เลิกนำเข้า ${ids.size} รายการแล้ว`);
+      } } : undefined);
+    } }],
+  });
+  // ตรวจในกล่อง: จำนวนต้อง ≥ 1 และเตือนรายการที่ชุดนี้สั่งไว้แล้ว
+  const d = $("dlg"), btn = d.querySelector(".dlg-actions .primary");
+  let firstCheck = true;
+  const check = () => {
+    const pending = new Set(S.orders.filter((o) => o.jigId === d.querySelector("#im-jig").value && isPending(o)).map((o) => o.what.trim().toLowerCase()));
+    let n = 0, bad = 0;
+    for (const tr of d.querySelectorAll("tbody tr")) {
+      const it = items[Number(tr.dataset.i)];
+      // เปิดกล่องครั้งแรก: รหัสที่ชุดนี้สั่งไว้แล้วเริ่มแบบไม่ติ๊ก กันนำเข้าใบเดิมซ้ำ (ติ๊กกลับเองได้)
+      if (firstCheck && pending.has(it.code.toLowerCase())) tr.querySelector(".im-on").checked = false;
+      const on = tr.querySelector(".im-on").checked, q = Number(tr.querySelector(".im-qty").value);
+      const qBad = on && !(q >= 1);
+      tr.querySelector(".im-qty").classList.toggle("invalid", qBad);
+      tr.querySelector(".im-flag").textContent = qBad ? "ใส่จำนวน" : pending.has(it.code.toLowerCase()) ? "ชุดนี้สั่งรหัสนี้ไว้แล้ว" : "";
+      tr.classList.toggle("off", !on);
+      if (on) n++; if (qBad) bad++;
+    }
+    firstCheck = false;
+    btn.disabled = !n || bad > 0;
+    btn.textContent = bad ? `ใส่จำนวนให้ครบก่อน (${bad})` : `นำเข้า ${n} รายการ`;
+  };
+  d.querySelector("#im-due").addEventListener("change", (e) => {
+    for (const inp of d.querySelectorAll(".im-rdue")) if (!inp.dataset.touched) inp.value = e.target.value;
+  });
+  for (const inp of d.querySelectorAll(".im-rdue")) inp.addEventListener("input", () => (inp.dataset.touched = "1"));
+  const form = d.querySelector("form"); // สร้างใหม่ทุกครั้งที่เปิดกล่อง ตัวฟังจึงไม่ค้างไปกล่องอื่น
+  form.addEventListener("input", check); form.addEventListener("change", check);
+  check();
+}
+
+/* ---------- เมนู ⋯ บนการ์ด ---------- */
+let popFor = null;
+function closePop() {
+  const p = $("pop"); if (p.hidden) return;
+  p.hidden = true;
+  if (popFor) { popFor.setAttribute("aria-expanded", "false"); popFor.focus(); }
+  popFor = null;
+}
+function openCardMenu(btn, j) {
+  closePop();
+  const next = STAGES[SIDX[j.stage] + 1];
+  const p = $("pop");
+  p.innerHTML = `<button role="menuitem" type="button" data-act="open" data-id="${j.id}">เปิดรายละเอียด</button>
+    ${next ? `<button role="menuitem" type="button" data-act="next" data-id="${j.id}">เลื่อนไป “${esc(next.label)}”${next.id === "done" ? "…" : ""}</button>` : ""}
+    <button role="menuitem" type="button" data-act="open" data-id="${j.id}">แจ้งปัญหา / รอ…</button>
+    <hr>
+    <button role="menuitem" type="button" class="danger-item" data-act="closeask" data-id="${j.id}">ปิดงาน: ไม่ได้งาน / ยกเลิก…</button>`;
+  p.hidden = false;
+  const r = btn.getBoundingClientRect(), w = p.offsetWidth, h = p.offsetHeight;
+  p.style.left = Math.max(12, Math.min(r.right - w, innerWidth - w - 12)) + "px";
+  p.style.top = (r.bottom + h + 8 > innerHeight ? Math.max(12, r.top - h - 6) : r.bottom + 6) + "px";
+  btn.setAttribute("aria-expanded", "true"); popFor = btn;
+  p.querySelector("button").focus();
+}
+
+/* ---------- คัดลอก: clipboard API ใช้ได้เฉพาะ https/localhost จึงมีทางสำรอง ---------- */
+async function copyText(text, selectEl) {
+  if (navigator.clipboard && window.isSecureContext) {
+    try { await navigator.clipboard.writeText(text); return "ok"; } catch (e) {}
+  }
+  const ta = document.createElement("textarea");
+  ta.value = text; ta.setAttribute("readonly", ""); ta.style.cssText = "position:fixed;top:0;left:0;opacity:0";
+  (document.querySelector("dialog[open]") || document.body).appendChild(ta);
+  ta.select(); ta.setSelectionRange(0, text.length);
+  let ok = false;
+  try { ok = document.execCommand("copy"); } catch (e) {}
+  ta.remove();
+  if (ok) return "ok";
+  if (selectEl) { const rg = document.createRange(); rg.selectNodeContents(selectEl); const sel = getSelection(); sel.removeAllRanges(); sel.addRange(rg); }
+  return "manual";
+}
+
+/* ---------- งานของฉัน ---------- */
+function mineData() {
+  const js = visibleJigs(false).filter((j) => j.stage === "prep").sort(byDue);
+  const counts = Object.fromEntries(Object.keys(OPS).map((k) => [k, 0]));
+  let all = 0;
+  for (const j of js) for (const p of j.parts) { const s = curStep(p); if (s) { counts[s.op]++; all++; } }
+  return { js, counts, all };
+}
+function renderMine() {
+  const { js, counts, all } = mineData();
+  const op = ui.mineOp in OPS || ui.mineOp === "all" ? ui.mineOp : "all";
+  const chips = `<div class="mine-chips" role="group" aria-label="กรองตามขั้น">
+      <button class="chip" type="button" data-act="mineop" data-op="all" aria-pressed="${op === "all"}">ทุกขั้น<span class="n">${all}</span></button>
+      ${Object.entries(OPS).map(([k, o]) => `<button class="chip" type="button" data-act="mineop" data-op="${k}" aria-pressed="${op === k}">${esc(o.label)}<span class="n">${counts[k]}</span></button>`).join("")}
+    </div>`;
+  const ro = ui.readOnly ? `<div class="ro-banner" style="margin-top:8px"><svg class="ico" aria-hidden="true"><use href="#i-lock"/></svg><span>บัญชีนี้ <b>ดูอย่างเดียว</b> · ปุ่มเริ่ม/เสร็จถูกซ่อน</span></div>` : "";
+  const groups = js.map((j) => {
+    const parts = j.parts.filter((p) => { const s = curStep(p); return s && (op === "all" || s.op === op); });
+    if (!parts.length) return "";
+    const n = daysLeftSafe(j.due);
+    const tone = n === null ? "" : n < 0 ? " late" : n <= 1 ? " soon" : "";
+    const r = readiness(j);
+    const b = batchInfo(j);
+    const batch = b && (op === "all" || b.op === op)
+      ? `<button class="btn outline" style="min-height:52px" type="button" data-act="batchask" data-id="${j.id}">${esc(batchLabel(b))}</button>` : "";
+    const open = ui.mineOpen.has(j.id);
+    const shown = open ? parts : parts.slice(0, MINE_SHOW);
+    return `<section class="mgroup" aria-label="ชุด ${esc(j.jigNo)}">
+      <div class="mgroup-h${tone}">
+        <button class="mgroup-open" type="button" data-act="open" data-id="${j.id}">
+          <span style="flex:1;min-width:0"><span class="no">${esc(j.jigNo)}</span> <span class="meta">· ${esc(j.customer)} · พร้อม ${r.ready}/${r.total}</span></span>
+          ${dueBadge(j)}<span aria-hidden="true">›</span>
+        </button>${batch}
+      </div>
+      ${shown.map((p) => { const nx = p.steps[p.steps.indexOf(curStep(p)) + 1]; return `<div class="mpart">
+        <div class="mpart-h"><span class="mono">${esc(p.name)}</span>${partStateHtml(p)}</div>
+        ${p.spec || nx ? `<div class="sub">${p.spec ? esc(p.spec) : ""}${p.spec && nx ? " · " : ""}${nx ? `ถัดไป ${esc(OPS[nx.op].label)}` : ""}</div>` : ""}
+        ${partActions(j, p, "mine")}
+      </div>`; }).join("")}
+      ${parts.length > MINE_SHOW ? `<button class="mmore" type="button" data-act="mineexp" data-id="${j.id}" aria-expanded="${open}">${open ? "ย่อรายการ" : `แสดงอีก ${parts.length - MINE_SHOW} ชิ้น`}</button>` : ""}
+    </section>`;
+  }).join("");
+  $("view-mine").innerHTML = chips + ro + (groups ? `<div class="mine-list">${groups}</div>` : `<div class="mine-empty" style="margin-top:12px">ไม่มีชิ้นส่วนที่รอขั้นนี้ · งานจะขึ้นที่นี่เมื่อชุดอยู่ขั้น “เตรียมชิ้นส่วน”</div>`);
+  $("n-mine").textContent = all || "";
+}
+function daysLeftSafe(d) { return d ? daysLeft(d) : null; }
+
+/* ---------- หน้าเพิ่มเติม (มือถือ) ---------- */
+function renderMore() {
+  const me = ui.me;
+  const pend = S.orders.filter((o) => activeIds().has(o.jigId) && isPending(o)).length;
+  const closed = S.jigs.filter((j) => j.closed).length;
+  $("view-more").innerHTML = `<div class="more-list">
+    <div class="list-card">
+      <button type="button" class="tab-link" data-view="orders">สั่งซื้อ / จ้างทำ ${pend ? `<span class="n alert">${pend} ค้าง</span>` : '<span aria-hidden="true">›</span>'}</button>
+      <button type="button" class="tab-link" data-view="archive">คลังงาน <span class="muted">${closed || ""} ›</span></button>
+      <button type="button" data-act="openbackup">สำรองข้อมูล <span aria-hidden="true">›</span></button>
+    </div>
+    ${me ? `<div class="list-card">
+      <div class="who"><b>${esc(me.name)}</b><span class="muted small"><span class="mono">${esc(me.username)}</span> · ${esc(ROLE_LABEL[me.role] || me.role)}</span></div>
+      <button type="button" data-act="openuser">${me.isAdmin ? "บัญชีของฉัน · จัดการผู้ใช้" : "บัญชีของฉัน · เปลี่ยนรหัสผ่าน"} <span aria-hidden="true">›</span></button>
+    </div>
+    <button class="btn" type="button" data-act="logout" style="min-height:56px;font-size:17px">ออกจากระบบ</button>` : ""}
+  </div>`;
+}
+
+document.addEventListener("change", (e) => {
+  const el = e.target, a = el.dataset.act;
+  if (a === "stage") requestStage(jigById(el.dataset.id), el.value, "select");
+  else if (a === "issue") { setIssue(jigById(el.dataset.id), el.value); commit(); }
+  else if (a === "ostatus") { commit(setOrderStatus(S.orders.find((o) => o.id === el.dataset.oid), el.value)); }
+  else if (a === "addstep") {
+    if (!el.value) return;
+    const j = jigById(el.dataset.id), p = partOf(j, el.dataset.pid);
+    p.steps.push({ op: el.value, state: "wait", start: null, end: null });
+    log(j.id, `${p.name}: เพิ่มขั้น ${OPS[el.value].label}`); commit();
+  }
+  else if (a === "field") {
+    const j = jigById(el.dataset.id), f = el.dataset.field, raw = el.value.trim();
+    const v = f === "qty" ? (raw ? Number(raw) : null) : raw || null;
+    if ((j[f] ?? null) === v) return;
+    const show = (x) => (x == null ? "—" : f === "due" ? fmtD(x) : x);
+    log(j.id, `แก้ ${FIELD_LABEL[f]}: ${show(j[f])} → ${show(v)}`);
+    j[f] = v; commit();
+  }
+  else if (el.id === "dr-note") { const j = jigById(el.dataset.id); j.note = el.value; log(j.id, "แก้หมายเหตุ"); commit("บันทึกหมายเหตุแล้ว"); }
+  else if (el.id === "rs-file") readRestore(el.files[0]);
+  else if (el.id === "csv-file" && el.files[0]) {
+    const file = el.files[0]; el.value = "";
+    const isPdf = /\.pdf$/i.test(file.name) || file.type === "application/pdf";
+    const read = isPdf
+      ? readMisumiPdf(file).then(({ items, po }) => items.length ? askImport(items, file.name, { pdf: true, po }) : toast("ไม่พบรายการในไฟล์ PDF นี้ ใช้ได้กับ “ใบยืนยันการสั่งซื้อสินค้า” ของ Misumi"))
+      : readOrderFile(file).then((items) => items.length ? askImport(items, file.name) : toast("ไม่พบรายการในไฟล์ ต้องมีคอลัมน์รหัสสินค้าและจำนวน"));
+    read.catch((err) => toast(err?.message === "load" ? "โหลดตัวอ่านไฟล์ไม่สำเร็จ ลองใหม่อีกครั้ง" : `อ่านไฟล์ไม่ได้ ตรวจว่าเป็น${isPdf ? "ใบยืนยันการสั่งซื้อ PDF ของ Misumi" : "ไฟล์ CSV หรือ Excel"}`));
+  }
+  else if (el.id === "kb-hide") { ui.hideEmpty = el.checked; render(); }
+  else if (el.id === "f-cust") { ui.cust = el.value; render(); }
+});
+$("f-q").addEventListener("input", (e) => { ui.q = e.target.value; render(); });
+document.addEventListener("click", (e) => {
+  const el = e.target.closest("[data-act]");
+  if (!e.target.closest("#pop") && !e.target.closest('[data-act="cardmenu"]')) closePop();
+  if (el && el.tagName !== "SELECT" && el.tagName !== "INPUT") {
+    const a = el.dataset.act;
+    if (el.closest("#pop")) closePop();
+    const j = el.dataset.id && jigById(el.dataset.id);
+    const p = j && el.dataset.pid && partOf(j, el.dataset.pid);
+    if (a === "toggle") { ui.open.has(j.id) ? ui.open.delete(j.id) : ui.open.add(j.id); render(); }
+    else if (a === "open") { ui.drawer = j.id; render(); }
+    else if (a === "close") { ui.drawer = null; render(); }
+    else if (a === "kbmode") { ui.kb = el.dataset.mode; render(); }
+    else if (a === "arch") { ui.arch = el.dataset.k; render(); }
+    else if (a === "next") { const n = STAGES[SIDX[j.stage] + 1]; if (n) requestStage(j, n.id, "next"); }
+    else if (a === "cardmenu") { if (popFor === el) closePop(); else openCardMenu(el, j); }
+    else if (a === "closeask") askClose(j);
+    else if (a === "batchask") askBatch(j);
+    else if (a === "mineop") { ui.mineOp = el.dataset.op; try { localStorage.setItem(MINE_OP_KEY, ui.mineOp); } catch (err) {} render(); }
+    else if (a === "mineexp") { ui.mineOpen.has(j.id) ? ui.mineOpen.delete(j.id) : ui.mineOpen.add(j.id); render(); }
+    else if (a === "openbackup") { ui.drawer = "backup"; render(); }
+    else if (a === "openuser") $("user-chip").click();
+    else if (a === "lostquick") { closeLost(j, "ลูกค้าไม่เปิด PO"); commit(`${j.jigNo} ปิดงาน: ลูกค้าไม่เปิด PO · ย้ายเข้าคลังงาน`, undoClose(j.id)); }
+    else if (a === "lost" && !$("dr-lost")) askClose(j);
+    else if (a === "lost") { closeLost(j, $("dr-lost").value); ui.drawer = null; commit(`${j.jigNo} ปิดงาน: ${j.closed.reason} · ย้ายเข้าคลังงาน`, undoClose(j.id)); }
+    else if (a === "reopen") { reopen(j); commit(`${j.jigNo} เปิดงานกลับแล้ว · ขั้น ${stage(j.stage).label}`); }
+    else if (a === "padv" && OPS[curStep(p)?.op]?.ext && curStep(p).state === "wait") askSend(j, p);
+    else if (a === "extedit") askExtEdit(j, p, Number(el.dataset.i));
+    else if (a === "oedit") { const o = S.orders.find((x) => x.id === el.dataset.oid); if (o) askOrderEdit(o); }
+    else if (a === "csvpick") $("csv-file")?.click();
+    else if (a === "mvstep") {
+      const i = Number(el.dataset.i), s = p.steps[i], prev = p.steps[i - 1];
+      if (s && prev && s.state === "wait" && prev.state === "wait") {
+        p.steps[i - 1] = s; p.steps[i] = prev;
+        log(j.id, `${p.name}: ย้าย ${OPS[s.op].label} ไปก่อน ${OPS[prev.op].label}`); commit();
+      }
+    }
+    else if (a === "padv") {
+      const id = j.id, pid = p.id;
+      commit(partAdvance(j, p), { label: "เลิกทำ", fn: () => { const x = jigById(id), q = x && partOf(x, pid); if (!q) return; partBack(x, q); commit(`${q.name}: เลิกทำแล้ว`); } });
+    }
+    else if (a === "pback") { partBack(j, p); commit(`${p.name}: ย้อนกลับ 1 ขั้น`); }
+    else if (a === "rmstep") {
+      const i = Number(el.dataset.i), s = p.steps[i];
+      if (s && s.state === "wait" && p.steps.length > 1) { p.steps.splice(i, 1); log(j.id, `${p.name}: เอาขั้น ${OPS[s.op].label} ออก`); commit(); }
+    }
+    else if (a === "receive") { const o = S.orders.find((x) => x.id === el.dataset.oid); commit(setOrderStatus(o, "รับครบ") || `รับของแล้ว · ${fmtD(isoToday())}`); }
+    else if (a === "addpart") {
+      const name = $("dr-part").value.trim();
+      if (!name) { $("dr-part").focus(); return; }
+      const preset = PRESETS.find((x) => x.id === $("dr-preset").value) || PRESETS[0];
+      j.parts.push({ id: `${j.id}-P${Date.now().toString(36)}`, name, spec: "", steps: preset.route.map((op) => ({ op, state: "wait", start: null, end: null })) });
+      log(j.id, `เพิ่มชิ้นส่วน ${name} (${preset.label})`);
+      commit(`เพิ่มชิ้นส่วน ${name} แล้ว`);
+      $("dr-preset").value = preset.id; $("dr-part").focus();
+    }
+    else if (a === "addorder") { ui.prefJig = j.id; ui.drawer = null; setView("orders"); render(); $("o-what").focus(); }
+    else if (a === "dobackup") doBackup();
+    else if (a === "copytable") copyTable();
+    else if (a === "dorestore") {
+      if (!ui.restore || !ui.canAdmin || ui.conn !== "live") return;
+      const data = ui.restore;
+      ui.restore = null; ui.drawer = null; ui.cust = ""; ui.open.clear();
+      // ประวัติจากไฟล์แทนที่เอกสารประวัติเดิมทั้งหมด จัดกลุ่มใหม่ตามชุด
+      for (const id of effective("logs").keys()) enqueue(`logs/${id}`, null);
+      const byJig = new Map();
+      for (const l of data.logs) { if (!byJig.has(l.jigId)) byJig.set(l.jigId, []); byJig.get(l.jigId).push({ at: l.at, text: l.text, src: l.src, by: l.by || "" }); }
+      for (const [jigId, entries] of byJig) enqueue(`logs/${jigId}~restore`, { jigId, writer: "restore", entries });
+      S = { jigs: data.jigs, orders: data.orders, logs: [] }; pendingLog = [];
+      log(S.jigs[0].id, "กู้ข้อมูลจากไฟล์สำรอง");
+      refreshCustOptions(); commit(`กู้ข้อมูลแล้ว · ${S.jigs.length} ชุด`);
+    }
+    return;
+  }
+  const tab = e.target.closest(".tab, .tab-link");
+  if (tab) { setView(tab.dataset.view); closeTools(); render(); }
+});
+$("scrim").addEventListener("click", () => { ui.drawer = null; render(); });
+document.addEventListener("keydown", (e) => {
+  if (e.key === "Escape" && !$("pop").hidden) { closePop(); return; }
+  if (e.key === "Escape" && document.querySelector("dialog[open]")) return; // dialog ปิดเอง
+  if (e.key === "Escape" && ui.drawer) { ui.drawer = null; render(); }
+  if (e.key === "Tab" && !$("drawer").hidden && !document.querySelector("dialog[open]")) trapFocus(e, $("drawer"));
+  if ((e.key === "ArrowDown" || e.key === "ArrowUp") && !$("pop").hidden) {
+    const items = [...$("pop").querySelectorAll("button")], i = items.indexOf(document.activeElement);
+    items[(i + (e.key === "ArrowDown" ? 1 : -1) + items.length) % items.length]?.focus(); e.preventDefault();
+  }
+  if ((e.key === "ArrowRight" || e.key === "ArrowLeft" || e.key === "ArrowDown" || e.key === "ArrowUp") && e.target.matches?.('[role="tab"]')) {
+    const list = [...e.target.parentElement.querySelectorAll('[role="tab"]')], i = list.indexOf(e.target);
+    const nx = list[(i + (e.key === "ArrowRight" || e.key === "ArrowDown" ? 1 : -1) + list.length) % list.length];
+    nx.focus(); nx.click(); e.preventDefault();
+  }
+  if (e.key === "Enter" && e.target.id === "dr-part") { e.preventDefault(); document.querySelector('[data-act="addpart"]').click(); }
+});
+document.addEventListener("submit", (e) => {
+  if (e.target.id !== "nj-form") return;
+  e.preventDefault();
+  const no = $("nj-no").value.trim(), cust = $("nj-cust").value.trim();
+  if (!no || !cust) return;
+  if (S.jigs.some((j) => j.jigNo.toLowerCase() === no.toLowerCase())) {
+    const f = $("nj-no");
+    f.setCustomValidity("มี Jig No นี้อยู่แล้ว"); f.reportValidity();
+    f.addEventListener("input", () => f.setCustomValidity(""), { once: true });
+    return;
+  }
+  const j = {
+    id: "J" + Date.now().toString(36), jigNo: no, customer: cust, po: null,
+    name: $("nj-name").value.trim() || null, qty: Number($("nj-qty").value) || null,
+    owner: $("nj-owner").value.trim() || null, due: $("nj-due").value || null,
+    stage: "drawing", stageAt: nowIso(), closed: null, issue: "", note: "", parts: [], seq: Date.now(),
+  };
+  S.jigs.push(j);
+  log(j.id, "สร้างงานใหม่ · ขั้น รับแบบ");
+  ui.drawer = j.id; refreshCustOptions();
+  commit(`สร้างงาน ${no} แล้ว`);
+});
+$("new-job").addEventListener("click", () => { ui.drawer = "new"; render(); $("nj-cust").focus(); });
+$("backup").addEventListener("click", () => { ui.drawer = "backup"; render(); });
+
+/* ---------- ผู้ใช้: เข้าสู่ระบบ, เมนูบัญชี, จัดการผู้ใช้ ---------- */
+const ROLE_LABEL = { viewer: "ดูอย่างเดียว", contributor: "ใช้งาน", editor: "หัวหน้า (Editor)", admin: "ผู้ดูแลระบบ" };
+$("lg-eye").addEventListener("click", () => {
+  const on = $("lg-pass").type === "password";
+  $("lg-pass").type = on ? "text" : "password";
+  $("lg-eye").setAttribute("aria-pressed", String(on));
+  $("lg-eye").setAttribute("aria-label", on ? "ซ่อนรหัสผ่าน" : "แสดงรหัสผ่าน");
+});
+$("lg-pass").addEventListener("input", () => { $("lg-pass").removeAttribute("aria-invalid"); $("lg-pass-wrap").classList.remove("err"); });
+function showLogin(msg) {
+  $("login").hidden = false;
+  $("lg-msg").textContent = msg || "";
+  setTimeout(() => $("lg-user").focus(), 0);
+}
+$("login-form").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  $("lg-btn").disabled = true; $("lg-msg").textContent = "";
+  try {
+    await apiFetch("/api/login", { method: "POST", body: JSON.stringify({ username: $("lg-user").value.trim(), password: $("lg-pass").value }) });
+    location.reload();
+  } catch (err) {
+    const down = err.code === "unavailable";
+    $("lg-msg").textContent = down ? "เชื่อมต่อเซิร์ฟเวอร์ไม่ได้ ตรวจว่าต่อ Wi-Fi วงเดียวกับเครื่องเซิร์ฟเวอร์" : (err.message || "เข้าสู่ระบบไม่สำเร็จ") + " · ลืมรหัสให้แจ้งผู้ดูแลระบบรีเซ็ต";
+    $("lg-conn").className = "conn-line" + (down ? " bad" : "");
+    $("lg-conn").textContent = down ? "เชื่อมต่อเซิร์ฟเวอร์ไม่ได้" : "เชื่อมต่อเซิร์ฟเวอร์โรงงานได้";
+    if (!down) { $("lg-pass").setAttribute("aria-invalid", "true"); $("lg-pass-wrap").classList.add("err"); $("lg-pass").select(); }
+    $("lg-btn").disabled = false;
+  }
+});
+function renderUserChip() {
+  const b = $("user-chip");
+  b.hidden = !ui.me;
+  if (ui.me) {
+    b.innerHTML = `<span class="avatar" aria-hidden="true">${esc([...ui.me.name][0] || "?")}</span><span class="who"><b>${esc(ui.me.name)}</b><span>${esc(ROLE_LABEL[ui.me.role] || ui.me.role)} · บัญชี${ui.me.isAdmin ? " · ผู้ใช้" : ""}</span></span>`;
+    b.setAttribute("aria-label", `บัญชีของฉัน: ${ui.me.name}`);
+  }
+}
+async function loadUsers() { try { ui.users = await apiFetch("/api/users"); } catch (e) { ui.users = []; } }
+const ROLE_HINT = { viewer: "ดูทุกหน้า แก้ไม่ได้", contributor: "กดเริ่ม/เสร็จ สั่งของ สร้างงาน", editor: "ทุกอย่าง + กู้ข้อมูลจาก Excel", admin: "ทุกอย่าง + จัดการผู้ใช้" };
+function renderUserPanel() {
+  const me = ui.me; if (!me) return;
+  const urls = me.urls || [];
+  const userRow = (u) => {
+    const editing = ui.uEdit === u.username;
+    return `<div class="user-row${u.active ? "" : " off"}${editing ? " editing" : ""}">
+      <div class="who"><b>${esc(u.name)}</b><span class="muted small mono">${esc(u.username)}${u.active ? "" : " · ปิดใช้งาน"}</span></div>
+      <span class="role ${u.role}">${esc(ROLE_LABEL[u.role] || u.role)}</span>
+      <button class="btn sm" type="button" data-act="uedit" data-u="${esc(u.username)}" aria-expanded="${editing}">${editing ? "ปิด" : "แก้ไข"}</button>
+      ${editing ? `<div class="user-edit">
+        <label class="form-col" style="gap:4px"><span class="muted small" style="font-weight:600">ชื่อที่แสดง</span><input class="field" id="ue-name" value="${esc(u.name)}"></label>
+        <fieldset class="radio-list"><legend>ระดับสิทธิ์</legend>
+          ${Object.entries(ROLE_LABEL).map(([k, v]) => `<label><input type="radio" name="ue-role" value="${k}"${k === u.role ? " checked" : ""}><span>${esc(v)} <span class="hint">· ${esc(ROLE_HINT[k])}</span></span></label>`).join("")}
+        </fieldset>
+        <div class="part-actions"><button class="btn primary" type="button" data-act="usave" data-u="${esc(u.username)}">บันทึก</button><button class="btn" type="button" data-act="uedit" data-u="${esc(u.username)}">ยกเลิก</button></div>
+        <div class="part-actions" style="border-top:1px solid var(--line);padding-top:12px">
+          <button class="btn danger-outline" type="button" data-act="ureset" data-u="${esc(u.username)}">รีเซ็ตรหัสผ่าน…</button>
+          <button class="btn danger-outline" type="button" data-act="uactive" data-u="${esc(u.username)}">${u.active ? "ปิดใช้งานบัญชี…" : "เปิดใช้งานบัญชี"}</button>
+        </div>
+      </div>` : ""}
+    </div>`;
+  };
+  $("drawer").innerHTML = `
+    <div class="dr-head">
+      <div style="flex:1;min-width:0"><h2 class="plain" id="dr-title" tabindex="-1">${esc(me.name)}</h2><p>${esc(me.username)} · ${esc(ROLE_LABEL[me.role] || me.role)}</p></div>
+      <button class="icon-btn boxed" type="button" data-act="close" aria-label="ปิดแผง">✕</button>
+    </div>
+    <div class="dr-body">
+      ${me.isAdmin ? `<div class="dr-sec"><h3><span>ผู้ใช้ทั้งหมด (${ui.users.length})</span></h3>
+        ${ui.newPw ? `<div class="pw-once" role="status">
+          <b>รหัสชั่วคราวของ <span class="mono">${esc(ui.newPw.user)}</span></b>
+          <div class="row"><span class="code" id="pw-once-code">${esc(ui.newPw.pw)}</span><button class="btn" type="button" data-act="copypw">คัดลอก</button></div>
+          <div class="bk-status" id="pw-copy-msg"></div>
+          <div class="muted small">แสดงครั้งเดียว แจ้งพนักงานแล้วให้เปลี่ยนรหัสเองหลังเข้าระบบ</div>
+          <div><button class="btn" type="button" data-act="pwdone">แจ้งแล้ว ปิดกล่องนี้</button></div>
+        </div>` : ""}
+        <div class="user-list">${ui.users.map(userRow).join("")}</div>
+        <form class="form-col" id="nu-form" style="margin-top:16px"><h3 style="margin:0">เพิ่มผู้ใช้</h3>
+          <div class="two">
+            <label>ชื่อผู้ใช้ (a-z 0-9 . _ -)<input class="field mono" id="nu-user" autocapitalize="none" spellcheck="false" required pattern="[a-z0-9._\\-]{2,40}"></label>
+            <label>ชื่อที่แสดง<input class="field" id="nu-name" required></label>
+          </div>
+          <label>ระดับสิทธิ์<select class="field" id="nu-role">${Object.entries(ROLE_LABEL).map(([k, v]) => `<option value="${k}"${k === "contributor" ? " selected" : ""}>${esc(v)}</option>`).join("")}</select></label>
+          <div class="bk-status" id="nu-msg" role="status"></div>
+          <div><button class="btn primary" type="submit">เพิ่มผู้ใช้</button></div>
+        </form></div>` : ""}
+      <form class="dr-sec form-col" id="pw-form"><h3 style="margin:0"><span>เปลี่ยนรหัสผ่านของฉัน</span></h3>
+        <label>รหัสผ่านเดิม<input class="field" type="password" id="pw-cur" autocomplete="current-password" required></label>
+        <label>รหัสผ่านใหม่ อย่างน้อย 8 ตัว<input class="field" type="password" id="pw-new" autocomplete="new-password" minlength="8" required></label>
+        <div class="bk-status" id="pw-msg" role="status"></div>
+        <div><button class="btn" type="submit">เปลี่ยนรหัสผ่าน</button></div>
+      </form>
+      <div class="dr-sec"><h3><span>เปิดบนมือถือ</span></h3>
+        ${urls.length ? urls.map((u) => `<div class="url-box">${esc(u)}</div>`).join("") : `<p class="empty-note">ไม่พบที่อยู่ในวงแลน</p>`}
+        <p class="empty-note" style="margin-top:8px">มือถือต้องต่อ Wi-Fi วงเดียวกับเครื่องเซิร์ฟเวอร์ เปิดที่อยู่นี้ใน Chrome หรือ Safari แล้วเลือก “เพิ่มลงในหน้าจอหลัก”</p>
+      </div>
+      <div class="dr-sec"><button class="btn" type="button" data-act="logout" style="width:100%;min-height:52px">ออกจากระบบ</button></div>
+    </div>`;
+}
+async function saveUser(payload) {
+  const u = ui.users.find((x) => x.username === payload.username);
+  try {
+    const res = await apiFetch("/api/users", { method: "POST", body: JSON.stringify({ name: u?.name, role: u?.role, active: !!(u ? u.active : 1), ...payload }) });
+    ui.newPw = res.password ? { user: payload.username, pw: res.password } : null;
+  } catch (err) { toast(err.message || "บันทึกผู้ใช้ไม่สำเร็จ"); }
+  await loadUsers(); keepScroll(renderUserPanel);
+}
+$("user-chip").addEventListener("click", async () => {
+  ui.newPw = null;
+  if (ui.me?.isAdmin) await loadUsers();
+  ui.drawer = "user"; $("drawer").dataset.kind = ""; render();
+});
+document.addEventListener("submit", async (e) => {
+  if (e.target.id === "pw-form") {
+    e.preventDefault();
+    const msg = $("pw-msg");
+    try {
+      await apiFetch("/api/me/password", { method: "POST", body: JSON.stringify({ current: $("pw-cur").value, next: $("pw-new").value }) });
+      msg.className = "bk-status ok"; msg.textContent = "เปลี่ยนรหัสผ่านแล้ว"; e.target.reset();
+    } catch (err) { msg.className = "bk-status err"; msg.textContent = err.message || "เปลี่ยนรหัสผ่านไม่สำเร็จ"; }
+  }
+  if (e.target.id === "nu-form") {
+    e.preventDefault();
+    await saveUser({ username: $("nu-user").value.trim().toLowerCase(), name: $("nu-name").value.trim(), role: $("nu-role").value, active: true });
+  }
+});
+document.addEventListener("change", (e) => {
+  if (e.target.dataset.act === "urole") saveUser({ username: e.target.dataset.u, role: e.target.value });
+});
+document.addEventListener("click", async (e) => {
+  const el = e.target.closest("[data-act]"); if (!el) return;
+  const a = el.dataset.act;
+  const u = el.dataset.u && ui.users.find((x) => x.username === el.dataset.u);
+  if (a === "ureset" && u) openDialog({
+    title: `รีเซ็ตรหัสผ่านของ ${u.name}?`,
+    lead: "รหัสเดิมใช้ไม่ได้ทันที และคนนี้จะหลุดจากระบบทุกเครื่อง ระบบจะแสดงรหัสใหม่ครั้งเดียว",
+    actions: [CANCEL(), { label: "รีเซ็ตรหัสผ่าน", cls: "danger", fn: () => { ui.uEdit = null; saveUser({ username: u.username, resetPassword: true }); } }],
+  });
+  else if (a === "uactive" && u) {
+    if (!u.active) { ui.uEdit = null; saveUser({ username: u.username, active: true }); }
+    else openDialog({
+      title: `ปิดใช้งานบัญชี ${u.name}?`,
+      lead: "คนนี้จะเข้าระบบไม่ได้และหลุดจากทุกเครื่อง ข้อมูลและประวัติที่บันทึกไว้ยังอยู่ เปิดใช้งานกลับได้",
+      actions: [CANCEL(), { label: "ปิดใช้งาน", cls: "danger", fn: () => { ui.uEdit = null; saveUser({ username: u.username, active: false }); } }],
+    });
+  }
+  else if (a === "uedit") { ui.uEdit = ui.uEdit === el.dataset.u ? null : el.dataset.u; keepScroll(renderUserPanel); document.querySelector(`[data-act="uedit"][data-u="${CSS.escape(el.dataset.u)}"]`)?.focus(); }
+  else if (a === "usave" && u) {
+    const role = document.querySelector('input[name="ue-role"]:checked')?.value || u.role;
+    const name = $("ue-name").value.trim() || u.name;
+    ui.uEdit = null; saveUser({ username: u.username, role, name });
+  }
+  else if (a === "copypw") {
+    const res = await copyText(ui.newPw?.pw || "", $("pw-once-code"));
+    const m = $("pw-copy-msg");
+    if (m) { m.className = "bk-status " + (res === "ok" ? "ok" : ""); m.textContent = res === "ok" ? "คัดลอกแล้ว" : "เลือกรหัสไว้ให้แล้ว กดค้าง (มือถือ) หรือ Ctrl+C เพื่อคัดลอก"; }
+  }
+  else if (a === "pwdone") { ui.newPw = null; keepScroll(renderUserPanel); }
+  else if (a === "logout") { try { await apiFetch("/api/logout", { method: "POST" }); } catch (err) {} location.reload(); }
+});
+
+// drag & drop ของการ์ดชุดบน Kanban
+let dragId = null;
+const kb = $("view-kanban");
+kb.addEventListener("dragstart", (e) => {
+  const c = e.target.closest(".card[draggable='true']"); if (!c || ui.readOnly) return;
+  dragId = c.dataset.id; c.classList.add("dragging");
+  try { e.dataTransfer.setData("text/plain", dragId); e.dataTransfer.effectAllowed = "move"; } catch (err) {}
+});
+kb.addEventListener("dragend", (e) => { e.target.closest?.(".card")?.classList.remove("dragging"); kb.querySelectorAll(".lane.over").forEach((l) => l.classList.remove("over")); dragId = null; });
+kb.addEventListener("dragover", (e) => {
+  const lane = e.target.closest(".lane"); if (!lane || !dragId || SIDX[lane.dataset.stage] == null) return;
+  e.preventDefault();
+  kb.querySelectorAll(".lane.over").forEach((l) => l !== lane && l.classList.remove("over"));
+  lane.classList.add("over");
+});
+kb.addEventListener("drop", (e) => {
+  const lane = e.target.closest(".lane"); if (!lane || !dragId || SIDX[lane.dataset.stage] == null) return;
+  e.preventDefault();
+  const j = jigById(dragId); dragId = null;
+  if (j.stage !== lane.dataset.stage) requestStage(j, lane.dataset.stage, "drag");
+  else render();
+});
+
+function refreshCustOptions() {
+  const custs = [...new Set(S.jigs.map((j) => j.customer))];
+  const html = `<option value="">ลูกค้าทั้งหมด</option>` + custs.map((c) => `<option${c === ui.cust ? " selected" : ""}>${esc(c)}</option>`).join("");
+  if ($("f-cust").innerHTML !== html) $("f-cust").innerHTML = html;
+}
+const startView = (() => {
+  const h = location.hash.slice(1);
+  if (VIEWS.includes(h)) return h;
+  let v = null; try { v = localStorage.getItem(VIEW_KEY); } catch (e) {}
+  if (VIEWS.includes(v)) return v;
+  return matchMedia("(max-width: 899px)").matches ? "mine" : "table";
+})();
+try { const op = localStorage.getItem(MINE_OP_KEY); if (op) ui.mineOp = op; } catch (e) {}
+setView(startView);
+render(true);
+connect();
+</script>
+
+</html>

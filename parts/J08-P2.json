@@ -1,0 +1,15 @@
+{
+  "id": "J08-P2",
+  "jigId": "J08",
+  "name": "KX-1553-02A",
+  "pos": 1,
+  "spec": "",
+  "steps": [
+    {
+      "end": null,
+      "op": "machining",
+      "start": null,
+      "state": "doing"
+    }
+  ]
+}

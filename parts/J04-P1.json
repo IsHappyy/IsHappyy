@@ -1,0 +1,15 @@
+{
+  "id": "J04-P1",
+  "jigId": "J04",
+  "name": "YZ99-F71-3500-4P",
+  "pos": 0,
+  "spec": "",
+  "steps": [
+    {
+      "end": null,
+      "op": "machining",
+      "start": null,
+      "state": "doing"
+    }
+  ]
+}

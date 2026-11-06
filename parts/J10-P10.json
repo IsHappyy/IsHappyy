@@ -1,0 +1,15 @@
+{
+  "id": "J10-P10",
+  "jigId": "J10",
+  "name": "M106KAI-B",
+  "pos": 9,
+  "spec": "",
+  "steps": [
+    {
+      "end": null,
+      "op": "machining",
+      "start": null,
+      "state": "doing"
+    }
+  ]
+}

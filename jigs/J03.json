@@ -1,0 +1,17 @@
+{
+  "closed": null,
+  "customer": "Pioneer",
+  "due": "2026-10-26",
+  "id": "J03",
+  "issue": "",
+  "jigNo": "TX-0482",
+  "name": null,
+  "note": "",
+  "owner": "Pichakorn",
+  "po": null,
+  "qty": 1,
+  "seq": 3,
+  "stage": "ready",
+  "stageAt": "2026-10-21T13:00:40.255Z",
+  "updated": "2026-10-21T13:00:40.255Z"
+}

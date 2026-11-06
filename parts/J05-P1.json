@@ -1,0 +1,15 @@
+{
+  "id": "J05-P1",
+  "jigId": "J05",
+  "name": "YZ99-FM1-R410-2J",
+  "pos": 0,
+  "spec": "",
+  "steps": [
+    {
+      "end": null,
+      "op": "machining",
+      "start": null,
+      "state": "doing"
+    }
+  ]
+}

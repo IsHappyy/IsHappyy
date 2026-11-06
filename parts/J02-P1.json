@@ -1,0 +1,15 @@
+{
+  "id": "J02-P1",
+  "jigId": "J02",
+  "name": "Base",
+  "pos": 0,
+  "spec": "",
+  "steps": [
+    {
+      "end": "2026-10-21T12:59:55.733Z",
+      "op": "machining",
+      "start": null,
+      "state": "done"
+    }
+  ]
+}

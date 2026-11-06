@@ -1,0 +1,17 @@
+{
+  "closed": null,
+  "customer": "Pioneer",
+  "due": "2026-11-03",
+  "id": "J11",
+  "issue": "",
+  "jigNo": "TS-1623",
+  "name": null,
+  "note": "",
+  "owner": "Pichakorn",
+  "po": null,
+  "qty": 1,
+  "seq": 11,
+  "stage": "prep",
+  "stageAt": null,
+  "updated": "2026-10-16"
+}

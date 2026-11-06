@@ -1,0 +1,15 @@
+{
+  "id": "J03-P3",
+  "jigId": "J03",
+  "name": "Guide",
+  "pos": 2,
+  "spec": "",
+  "steps": [
+    {
+      "end": null,
+      "op": "machining",
+      "start": null,
+      "state": "doing"
+    }
+  ]
+}

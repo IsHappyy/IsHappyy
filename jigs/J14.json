@@ -1,0 +1,17 @@
+{
+  "closed": null,
+  "customer": "Canon",
+  "due": "2026-11-11",
+  "id": "J14",
+  "issue": "รอ Supplier จัดทำ",
+  "jigNo": "BZ99-FM1-A605-10J",
+  "name": null,
+  "note": "",
+  "owner": "Pichakorn",
+  "po": "RFQ4194653",
+  "qty": 1,
+  "seq": 14,
+  "stage": "assembly",
+  "stageAt": "2026-10-21T13:01:33.863Z",
+  "updated": "2026-10-21T13:01:33.863Z"
+}

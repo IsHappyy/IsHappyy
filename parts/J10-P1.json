@@ -1,0 +1,15 @@
+{
+  "id": "J10-P1",
+  "jigId": "J10",
+  "name": "TS-1621-01A",
+  "pos": 0,
+  "spec": "",
+  "steps": [
+    {
+      "end": null,
+      "op": "machining",
+      "start": null,
+      "state": "doing"
+    }
+  ]
+}

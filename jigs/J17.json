@@ -1,0 +1,17 @@
+{
+  "closed": null,
+  "customer": "Pioneer",
+  "due": null,
+  "id": "J17",
+  "issue": "",
+  "jigNo": "TL-0702",
+  "name": "IC-HLD",
+  "note": "จาก Cover sheet TL-0702_A (Request No. MJR-21-186) · ประกอบแบบ Spot welding · สถานะยังไม่ได้อัปเดตจากหน้างาน",
+  "owner": null,
+  "po": "WO-27-0184",
+  "qty": null,
+  "seq": 17,
+  "stage": "drawing",
+  "stageAt": null,
+  "updated": null
+}

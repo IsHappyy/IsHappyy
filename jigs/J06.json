@@ -1,0 +1,17 @@
+{
+  "closed": null,
+  "customer": "Canon",
+  "due": "2026-10-27",
+  "id": "J06",
+  "issue": "",
+  "jigNo": "SX01-FM1-R475-1J",
+  "name": null,
+  "note": "",
+  "owner": "Pichakorn",
+  "po": "PO251100102731",
+  "qty": 1,
+  "seq": 6,
+  "stage": "prep",
+  "stageAt": null,
+  "updated": null
+}

@@ -1,0 +1,15 @@
+{
+  "id": "J03-P2",
+  "jigId": "J03",
+  "name": "Support",
+  "pos": 1,
+  "spec": "",
+  "steps": [
+    {
+      "end": null,
+      "op": "machining",
+      "start": null,
+      "state": "doing"
+    }
+  ]
+}

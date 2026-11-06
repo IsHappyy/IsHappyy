@@ -1,0 +1,17 @@
+{
+  "closed": null,
+  "customer": "Canon",
+  "due": "2026-11-11",
+  "id": "J15",
+  "issue": "",
+  "jigNo": "SZ99-FM1-A619-7J",
+  "name": null,
+  "note": "",
+  "owner": "Pichakorn",
+  "po": "PO251100103170",
+  "qty": 1,
+  "seq": 15,
+  "stage": "ready",
+  "stageAt": null,
+  "updated": null
+}

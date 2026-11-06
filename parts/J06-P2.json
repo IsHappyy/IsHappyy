@@ -1,0 +1,15 @@
+{
+  "id": "J06-P2",
+  "jigId": "J06",
+  "name": "SX01-FM1-R475-1J  NO.63",
+  "pos": 1,
+  "spec": "",
+  "steps": [
+    {
+      "end": null,
+      "op": "machining",
+      "start": null,
+      "state": "doing"
+    }
+  ]
+}

@@ -1,0 +1,17 @@
+{
+  "closed": null,
+  "customer": "Canon",
+  "due": "2026-10-27",
+  "id": "J07",
+  "issue": "",
+  "jigNo": "YZ99-F15-9200-2J",
+  "name": null,
+  "note": "",
+  "owner": "Pichakorn",
+  "po": "PO251100103070",
+  "qty": 2,
+  "seq": 7,
+  "stage": "prep",
+  "stageAt": null,
+  "updated": null
+}
